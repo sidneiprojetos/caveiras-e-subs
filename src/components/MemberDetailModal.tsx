@@ -1,0 +1,271 @@
+import React from 'react';
+import { X, Phone, HeartPulse, Bike, Calendar, Shield, MapPin, Edit3, Trash2, Printer, ExternalLink, Award } from 'lucide-react';
+import { Member } from '../types';
+import { GrupamentoBadge } from './GrupamentoBadge';
+
+interface MemberDetailModalProps {
+  member: Member | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onEdit: (member: Member) => void;
+  onDelete: (memberId: string) => void;
+  isAdmin: boolean;
+}
+
+export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
+  member,
+  isOpen,
+  onClose,
+  onEdit,
+  onDelete,
+  isAdmin
+}) => {
+  if (!isOpen || !member) return null;
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const getCleanPhone = (p: string) => p.replace(/\D/g, '');
+
+  const calculateYears = (dateStr: string) => {
+    if (!dateStr) return null;
+    const diff = new Date().getTime() - new Date(dateStr).getTime();
+    const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+    return years;
+  };
+
+  const yearsInClub = calculateYears(member.entryDate);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-2xl my-8 bg-[#11141a] border border-zinc-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Top bar */}
+        <div className="px-6 py-4 bg-[#181c24] border-b border-zinc-800 flex items-center justify-between no-print">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-zinc-800 text-amber-400 border border-zinc-700">
+              {member.coleteNumber}
+            </span>
+            <span className="text-xs text-zinc-400">Dossiê do Integrante</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              title="Imprimir Ficha Cadastral"
+              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition text-xs flex items-center gap-1.5 px-2.5"
+            >
+              <Printer size={14} />
+              <span>Imprimir</span>
+            </button>
+
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => onEdit(member)}
+                  className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition text-xs flex items-center gap-1.5 px-2.5"
+                >
+                  <Edit3 size={14} />
+                  <span>Editar</span>
+                </button>
+                <button
+                  onClick={() => onDelete(member.id)}
+                  className="p-1.5 rounded-lg bg-red-950/80 hover:bg-red-900 text-red-400 transition text-xs flex items-center gap-1.5 px-2.5 border border-red-800/60"
+                >
+                  <Trash2 size={14} />
+                  <span>Excluir</span>
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={onClose}
+              className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition ml-2"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 overflow-y-auto space-y-6 text-zinc-100">
+          {/* Header Profile Section */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 pb-6 border-b border-zinc-800">
+            <div className="relative shrink-0">
+              <img
+                src={member.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'}
+                alt={member.vulgo}
+                className="w-28 h-28 rounded-2xl object-cover border-2 border-red-600 shadow-xl bg-zinc-800"
+              />
+              <span className={`absolute -bottom-2 -right-2 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border shadow-md ${
+                member.status === 'Ativo' ? 'bg-emerald-950 border-emerald-700 text-emerald-400' : 'bg-amber-950 border-amber-700 text-amber-400'
+              }`}>
+                {member.status}
+              </span>
+            </div>
+
+            <div className="flex-1 text-center sm:text-left space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h1 className="text-2xl font-black text-white font-cinzel tracking-wide">
+                    {member.vulgo}
+                  </h1>
+                  <p className="text-sm text-zinc-300 font-medium">{member.name}</p>
+                </div>
+
+                <div className="flex sm:flex-col items-center sm:items-end gap-1.5 justify-center">
+                  <GrupamentoBadge grupamento={member.grupamento} size="md" />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-zinc-400 pt-1">
+                <span className="flex items-center gap-1.5 text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700/60">
+                  <MapPin size={13} className="text-red-400" />
+                  Divisão: <strong className="text-white">{member.divisaoName}</strong>
+                </span>
+
+                <span className="flex items-center gap-1.5 text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700/60">
+                  <Calendar size={13} className="text-amber-400" />
+                  Desde: <strong className="text-white">{new Date(member.entryDate).toLocaleDateString('pt-BR')}</strong>
+                  {yearsInClub !== null && (
+                    <span className="text-[11px] text-amber-400 font-bold">({yearsInClub} {yearsInClub === 1 ? 'ano' : 'anos'} de MC)</span>
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Contact Action */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-zinc-400 block">Contato Telefônico</span>
+                <span className="text-sm font-semibold text-white">{member.phone || 'Não informado'}</span>
+              </div>
+              {member.phone && (
+                <a
+                  href={`https://wa.me/55${getCleanPhone(member.phone)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                >
+                  <Phone size={13} />
+                  WhatsApp
+                </a>
+              )}
+            </div>
+
+            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-zinc-400 block">Tipo Sanguíneo</span>
+                <span className="text-base font-extrabold text-red-400 font-mono">{member.bloodType}</span>
+              </div>
+              <div className="w-9 h-9 rounded-lg bg-red-950/60 border border-red-800/80 flex items-center justify-center text-red-400">
+                <HeartPulse size={18} />
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Motorcycle details */}
+            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                <Bike size={16} />
+                <span>Motocicleta Oficial</span>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                  <span className="text-zinc-400">Marca / Modelo:</span>
+                  <span className="font-semibold text-white">
+                    {member.motorcycle?.brand} {member.motorcycle?.model || ''}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                  <span className="text-zinc-400">Cilindrada:</span>
+                  <span className="font-mono text-zinc-200">{member.motorcycle?.engineCc || 'Não informado'}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                  <span className="text-zinc-400">Placa:</span>
+                  <span className="font-mono font-bold text-amber-400 bg-black/40 px-2 py-0.5 rounded border border-zinc-800">
+                    {member.motorcycle?.plate || 'SEM PLACA'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Ano:</span>
+                  <span className="text-zinc-200">{member.motorcycle?.year || '-'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Info */}
+            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wider">
+                <HeartPulse size={16} />
+                <span>Contato de Emergência</span>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                  <span className="text-zinc-400">Nome:</span>
+                  <span className="font-semibold text-white">{member.emergencyContact?.name || 'Não cadastrado'}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
+                  <span className="text-zinc-400">Parentesco:</span>
+                  <span className="text-zinc-200">{member.emergencyContact?.relationship || '-'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-zinc-400">Telefone:</span>
+                  <span className="font-mono font-semibold text-emerald-400">
+                    {member.emergencyContact?.phone || '-'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Observations & History */}
+          {member.observations && (
+            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-4 space-y-2">
+              <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                Histórico & Observações Disciplinares
+              </span>
+              <p className="text-xs text-zinc-300 leading-relaxed bg-[#0c0e12] p-3 rounded-lg border border-zinc-800/80">
+                {member.observations}
+              </p>
+            </div>
+          )}
+
+          {/* Digital Card Preview */}
+          <div className="bg-gradient-to-r from-zinc-900 via-[#181a20] to-zinc-900 border border-zinc-700/80 rounded-xl p-4 space-y-3 print-card">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-cinzel font-bold text-red-500 tracking-wider">INSANOS MOTO CLUBE</span>
+              <span className="font-mono text-zinc-400">CREDENTIAL ID #{member.coleteNumber}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <div>
+                <p className="text-lg font-black text-white font-cinzel">{member.vulgo}</p>
+                <p className="text-xs text-zinc-400">{member.divisaoName} • {member.grupamento}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-zinc-500 block">SANGUE</span>
+                <span className="text-lg font-black text-red-500 font-mono">{member.bloodType}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-3.5 bg-[#181c24] border-t border-zinc-800 flex justify-end no-print">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold transition"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

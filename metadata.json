@@ -1,0 +1,6 @@
+{
+  "name": "Insanos M.C. - Gestão de Grupamentos e Divisões",
+  "description": "Sistema oficial de cadastro, controle de grupamentos, divisões e relatórios detalhados do Insanos Motorcycle Club.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
