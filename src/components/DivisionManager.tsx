@@ -270,7 +270,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
 
       {/* Modal for Add / Edit Division */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
           <div className="relative w-full max-w-lg bg-[#11141a] border border-zinc-700/80 rounded-2xl shadow-2xl p-6 text-zinc-100">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-700"></div>
 
@@ -315,7 +315,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ex: Umuarama Norte, Maringá, Paranavaí"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                     required
                   />
                 </div>
@@ -329,7 +329,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     value={state}
                     onChange={(e) => setState(e.target.value.toUpperCase())}
                     placeholder="PR"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white uppercase focus:outline-hidden focus:border-red-500 font-mono"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white uppercase focus:outline-none focus:border-red-500 font-mono"
                   />
                 </div>
               </div>
@@ -343,7 +343,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="Ex: Umuarama, Cianorte, etc."
-                  className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                  className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     value={regionalDirector}
                     onChange={(e) => setRegionalDirector(e.target.value)}
                     placeholder="Ex: Caveira Sidnei"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
 
@@ -370,7 +370,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     value={subDirector}
                     onChange={(e) => setSubDirector(e.target.value)}
                     placeholder="Ex: Subdiretor Marreta"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
               </div>
@@ -385,7 +385,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     value={meetingSchedule}
                     onChange={(e) => setMeetingSchedule(e.target.value)}
                     placeholder="Ex: Quintas-feiras às 20h"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
 
@@ -398,7 +398,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     value={meetingLocation}
                     onChange={(e) => setMeetingLocation(e.target.value)}
                     placeholder="Ex: Sede Regional Central"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
               </div>
@@ -412,7 +412,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Informações sobre a divisão, área de abrangência ou histórico..."
-                  className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-hidden focus:border-red-500"
+                  className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
                 ></textarea>
               </div>
 

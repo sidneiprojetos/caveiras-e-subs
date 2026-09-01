@@ -134,9 +134,20 @@ export default function App() {
 
   const handleDeleteDivisao = (divisaoId: string) => {
     const div = divisoes.find(d => d.id === divisaoId);
+    if (!div) return;
+
+    // Check if any member is assigned to this division
+    const memberCount = members.filter(m => m.divisaoId === divisaoId).length;
+    if (memberCount > 0) {
+      showToast(`Não é possível excluir: existem ${memberCount} integrante(s) vinculados a esta divisão. Transfira-os antes de excluir.`, 'error');
+      return;
+    }
+
     const updated = divisoes.filter(d => d.id !== divisaoId);
     handleSaveDivisoes(updated);
-    showToast(`Divisão ${div?.name || ''} removida.`);
+    const newLogs = addActivityLog('EXCLUSAO', div.name, `Divisão "${div.name}" removida do sistema.`);
+    setLogs(newLogs);
+    showToast(`Divisão ${div.name} removida.`);
   };
 
   // Admin Auth Handlers

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Search, Filter, Plus, LayoutGrid, List, Phone, MapPin, 
-  HeartPulse, Bike, Calendar, MoreVertical, Edit3, Trash2, 
-  Eye, Shield, Skull, ExternalLink, ArrowUpDown, ChevronDown, Check
+  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown
 } from 'lucide-react';
-import { Member, Divisao, FilterState, DEFAULT_GRUPAMENTOS } from '../types';
+import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 
 interface MemberListProps {
@@ -36,7 +35,6 @@ export const MemberList: React.FC<MemberListProps> = ({
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [bloodFilter, setBloodFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'coleteNumber' | 'entryDate' | 'divisaoName'>('vulgo');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -48,17 +46,14 @@ export const MemberList: React.FC<MemberListProps> = ({
     if (grupamentoFilter !== 'all' && m.grupamento !== grupamentoFilter) return false;
     // Status filter
     if (statusFilter !== 'all' && m.status !== statusFilter) return false;
-    // Blood filter
-    if (bloodFilter !== 'all' && m.bloodType !== bloodFilter) return false;
     // Search query
     if (search.trim()) {
       const q = search.toLowerCase();
       const matchName = m.name.toLowerCase().includes(q);
       const matchVulgo = m.vulgo.toLowerCase().includes(q);
       const matchColete = m.coleteNumber.toLowerCase().includes(q);
-      const matchPlate = m.motorcycle?.plate?.toLowerCase().includes(q);
       const matchCity = m.divisaoName?.toLowerCase().includes(q);
-      if (!matchName && !matchVulgo && !matchColete && !matchPlate && !matchCity) return false;
+      if (!matchName && !matchVulgo && !matchColete && !matchCity) return false;
     }
     return true;
   }).sort((a, b) => {
@@ -104,14 +99,12 @@ export const MemberList: React.FC<MemberListProps> = ({
   const activeFiltersCount = 
     (currentDivisionFilter !== 'all' ? 1 : 0) +
     (grupamentoFilter !== 'all' ? 1 : 0) +
-    (statusFilter !== 'all' ? 1 : 0) +
-    (bloodFilter !== 'all' ? 1 : 0);
+    (statusFilter !== 'all' ? 1 : 0);
 
   const resetAllFilters = () => {
     onDivisionFilterChange('all');
     setGrupamentoFilter('all');
     setStatusFilter('all');
-    setBloodFilter('all');
     setSearch('');
   };
 
@@ -125,8 +118,8 @@ export const MemberList: React.FC<MemberListProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por Vulgo, Nome, Colete, Placa da Moto..."
-            className="w-full bg-[#0c0e12] border border-zinc-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-hidden focus:border-red-500 transition"
+            placeholder="Buscar por Vulgo, Nome, Colete, Divisão..."
+            className="w-full bg-[#0c0e12] border border-zinc-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 transition"
           />
           <Search size={16} className="absolute left-3.5 top-3 text-zinc-500 pointer-events-none" />
           {search && (
@@ -189,7 +182,7 @@ export const MemberList: React.FC<MemberListProps> = ({
           <select
             value={currentDivisionFilter}
             onChange={(e) => onDivisionFilterChange(e.target.value)}
-            className="bg-transparent text-white font-medium focus:outline-hidden cursor-pointer"
+            className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
           >
             <option value="all" className="bg-[#12151c]">Todas as Divisões ({divisoes.length})</option>
             {divisoes.map((d) => (
@@ -204,7 +197,7 @@ export const MemberList: React.FC<MemberListProps> = ({
           <select
             value={grupamentoFilter}
             onChange={(e) => setGrupamentoFilter(e.target.value)}
-            className="bg-transparent text-white font-medium focus:outline-hidden cursor-pointer"
+            className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
           >
             <option value="all" className="bg-[#12151c]">Todos os Grupamentos</option>
             {DEFAULT_GRUPAMENTOS.map((g) => (
@@ -219,7 +212,7 @@ export const MemberList: React.FC<MemberListProps> = ({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-transparent text-white font-medium focus:outline-hidden cursor-pointer"
+            className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
           >
             <option value="all" className="bg-[#12151c]">Todos os Status</option>
             <option value="Ativo" className="bg-[#12151c]">Ativo</option>
@@ -229,28 +222,13 @@ export const MemberList: React.FC<MemberListProps> = ({
           </select>
         </div>
 
-        {/* Blood Type Filter */}
-        <div className="flex items-center gap-1.5 bg-[#0c0e12] px-3 py-1.5 rounded-lg border border-zinc-800">
-          <span className="text-zinc-500 text-[11px]">Sangue:</span>
-          <select
-            value={bloodFilter}
-            onChange={(e) => setBloodFilter(e.target.value)}
-            className="bg-transparent text-red-400 font-bold focus:outline-hidden cursor-pointer"
-          >
-            <option value="all" className="bg-[#12151c] text-white">Todos</option>
-            {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bt => (
-              <option key={bt} value={bt} className="bg-[#12151c]">{bt}</option>
-            ))}
-          </select>
-        </div>
-
         {/* Sort selector */}
         <div className="flex items-center gap-1.5 bg-[#0c0e12] px-3 py-1.5 rounded-lg border border-zinc-800 ml-auto">
           <span className="text-zinc-500 text-[11px]">Ordenar por:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-transparent text-zinc-200 font-medium focus:outline-hidden cursor-pointer"
+            className="bg-transparent text-zinc-200 font-medium focus:outline-none cursor-pointer"
           >
             <option value="vulgo" className="bg-[#12151c]">Vulgo (Nome de Guerra)</option>
             <option value="name" className="bg-[#12151c]">Nome Completo</option>
@@ -302,17 +280,18 @@ export const MemberList: React.FC<MemberListProps> = ({
               <div className="absolute top-0 left-0 right-0 h-1 bg-zinc-800 group-hover:bg-gradient-to-r group-hover:from-red-600 group-hover:via-amber-500 group-hover:to-red-700 transition"></div>
 
               <div className="space-y-4">
-                {/* Header with Photo, Vulgo & Badge */}
-                <div className="flex items-start gap-4">
+                {/* Header with Insignia Emblem, Vulgo & Badge */}
+                <div className="flex items-start gap-3.5">
                   <div className="relative shrink-0">
-                    <img
-                      src={member.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'}
-                      alt={member.vulgo}
-                      className="w-16 h-16 rounded-xl object-cover border border-red-600/70 shadow-md bg-zinc-800"
-                    />
-                    <span className="absolute -bottom-1 -right-1 font-mono text-[9px] font-extrabold text-red-400 bg-black/90 px-1 py-0.2 rounded border border-zinc-700">
-                      {member.bloodType}
-                    </span>
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#1c2230] to-[#0c0e14] border-2 border-red-600/80 shadow-md flex items-center justify-center text-red-400 group-hover:border-red-500 group-hover:shadow-red-900/50 transition">
+                      {member.grupamento === 'Caveira' && <Skull size={28} className="text-red-500" />}
+                      {member.grupamento === 'Subdiretor' && <Shield size={28} className="text-amber-500" />}
+                      {member.grupamento === 'Operacional Regional' && <Shield size={28} className="text-blue-500" />}
+                      {member.grupamento === 'Subdiretor / Caveira' && <Skull size={28} className="text-purple-400" />}
+                      {member.grupamento !== 'Caveira' && member.grupamento !== 'Subdiretor' && member.grupamento !== 'Operacional Regional' && member.grupamento !== 'Subdiretor / Caveira' && (
+                        <Shield size={28} className="text-zinc-400" />
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -338,7 +317,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                   </div>
                 </div>
 
-                {/* Division & Motorcycle pill */}
+                {/* Division and Dates pill */}
                 <div className="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800/80 space-y-1.5 text-xs">
                   <div className="flex items-center justify-between text-zinc-300">
                     <span className="flex items-center gap-1 text-zinc-400 text-[11px]">
@@ -348,17 +327,15 @@ export const MemberList: React.FC<MemberListProps> = ({
                     <span className="font-semibold text-white truncate max-w-[150px]">{member.divisaoName}</span>
                   </div>
 
-                  {member.motorcycle?.brand && (
-                    <div className="flex items-center justify-between text-zinc-300">
-                      <span className="flex items-center gap-1 text-zinc-400 text-[11px]">
-                        <Bike size={12} className="text-amber-400" />
-                        Máquina:
-                      </span>
-                      <span className="font-mono text-[11px] text-zinc-200 truncate max-w-[150px]">
-                        {member.motorcycle.brand} {member.motorcycle.model || ''}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between text-zinc-300">
+                    <span className="flex items-center gap-1 text-zinc-400 text-[11px]">
+                      <Calendar size={12} className="text-amber-400" />
+                      No MC desde:
+                    </span>
+                    <span className="font-medium text-zinc-300">
+                      {new Date(member.entryDate).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -378,7 +355,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                     </a>
                   )}
                   <span className="text-[11px] text-zinc-500 font-mono">
-                    {member.phone}
+                    {member.phone || 'Sem telefone'}
                   </span>
                 </div>
 
@@ -431,8 +408,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                   <th className="py-3 px-4">Grupamento</th>
                   <th className="py-3 px-4">Divisão</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Sangue</th>
-                  <th className="py-3 px-4">Moto & Placa</th>
+                  <th className="py-3 px-4">Entrada no MC</th>
                   <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
               </thead>
@@ -448,11 +424,15 @@ export const MemberList: React.FC<MemberListProps> = ({
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
-                        <img
-                          src={m.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'}
-                          alt={m.vulgo}
-                          className="w-8 h-8 rounded-lg object-cover border border-red-600/70 shrink-0 bg-zinc-800"
-                        />
+                        <div className="w-8 h-8 rounded-lg bg-[#181c24] border border-red-600/70 flex items-center justify-center text-red-400 shrink-0">
+                          {m.grupamento === 'Caveira' && <Skull size={16} className="text-red-500" />}
+                          {m.grupamento === 'Subdiretor' && <Shield size={16} className="text-amber-500" />}
+                          {m.grupamento === 'Operacional Regional' && <Shield size={16} className="text-blue-500" />}
+                          {m.grupamento === 'Subdiretor / Caveira' && <Skull size={16} className="text-purple-400" />}
+                          {m.grupamento !== 'Caveira' && m.grupamento !== 'Subdiretor' && m.grupamento !== 'Operacional Regional' && m.grupamento !== 'Subdiretor / Caveira' && (
+                            <Shield size={16} className="text-zinc-400" />
+                          )}
+                        </div>
                         <div>
                           <strong className="text-white block font-semibold group-hover:text-red-400 transition font-cinzel">
                             {m.vulgo}
@@ -474,12 +454,8 @@ export const MemberList: React.FC<MemberListProps> = ({
                         {m.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono font-extrabold text-red-400">
-                      {m.bloodType}
-                    </td>
-                    <td className="py-3 px-4 text-zinc-300">
-                      <div>{m.motorcycle?.brand} {m.motorcycle?.model}</div>
-                      <span className="text-[10px] font-mono text-zinc-500">{m.motorcycle?.plate}</span>
+                    <td className="py-3 px-4 text-zinc-300 font-medium">
+                      {new Date(m.entryDate).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>

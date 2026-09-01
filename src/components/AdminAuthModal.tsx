@@ -76,7 +76,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="relative w-full max-w-md bg-[#13161c] border border-zinc-700/80 rounded-xl shadow-2xl p-6 text-zinc-100 overflow-hidden">
         {/* Top accent line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-700"></div>
@@ -118,7 +118,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     value={currentPin}
                     onChange={(e) => setCurrentPin(e.target.value)}
                     placeholder="PIN atual (padrão: 1969)"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                     required
                   />
                 </div>
@@ -130,7 +130,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     value={newPin}
                     onChange={(e) => setNewPin(e.target.value)}
                     placeholder="Ex: 4829"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                     required
                   />
                 </div>
@@ -142,7 +142,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     value={confirmNewPin}
                     onChange={(e) => setConfirmNewPin(e.target.value)}
                     placeholder="Repita o novo PIN"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-hidden focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500"
                     required
                   />
                 </div>
@@ -241,7 +241,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     }}
                     placeholder="Digite o PIN (Padrão: 1969)"
                     autoFocus
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-hidden focus:border-red-500 font-mono tracking-widest"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 font-mono tracking-widest"
                   />
                   <div className="absolute right-3 top-2.5 text-zinc-500 pointer-events-none">
                     <KeyRound size={16} />

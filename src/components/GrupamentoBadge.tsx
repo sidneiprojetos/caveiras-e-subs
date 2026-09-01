@@ -49,7 +49,7 @@ export const GrupamentoBadge: React.FC<GrupamentoBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center rounded-md border backdrop-blur-xs transition-colors shadow-xs select-none ${meta.badgeBg} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center rounded-md border backdrop-blur-sm transition-colors shadow-sm select-none ${meta.badgeBg} ${sizeClasses[size]} ${className}`}
     >
       {showIcon && getIcon()}
       <span>{meta.name}</span>

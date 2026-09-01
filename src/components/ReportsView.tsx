@@ -3,8 +3,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { 
-  Printer, Download, FileSpreadsheet, Database, Shield, Skull, Crosshair, Star, 
-  Users, MapPin, HeartPulse, Filter, RefreshCw, Upload, CheckCircle2
+  Printer, Download, FileSpreadsheet, Shield, Skull, Crosshair, Star, 
+  Users, MapPin, Filter, Upload, CheckCircle2
 } from 'lucide-react';
 import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
@@ -32,16 +32,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   const operacionais = members.filter(m => m.grupamento === 'Operacional Regional').length;
   const subdiretoresCaveiras = members.filter(m => m.grupamento === 'Subdiretor / Caveira').length;
   const ativos = members.filter(m => m.status === 'Ativo').length;
-  const emObservacao = members.filter(m => m.status === 'Em Observação').length;
-
-  // Grupamentos Chart Data
-  const grupamentoColors: Record<string, string> = {
-    'Caveira': '#ef4444',
-    'Subdiretor': '#f59e0b',
-    'Operacional Regional': '#3b82f6',
-    'Subdiretor / Caveira': '#a855f7',
-    'Outro': '#71717a'
-  };
 
   const grupamentoData = [
     { name: 'Caveira', value: caveiras, fill: '#ef4444' },
@@ -58,24 +48,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       fullName: d.name,
       integrantes: count
     };
-  });
-
-  // Moto Brands Data
-  const brandCountMap: Record<string, number> = {};
-  members.forEach(m => {
-    const brand = m.motorcycle?.brand || 'Outra';
-    brandCountMap[brand] = (brandCountMap[brand] || 0) + 1;
-  });
-  const motoData = Object.entries(brandCountMap).map(([brand, count]) => ({
-    brand,
-    count
-  })).sort((a, b) => b.count - a.count);
-
-  // Blood Types Data
-  const bloodMap: Record<string, number> = {};
-  members.forEach(m => {
-    const bt = m.bloodType || 'Não Informado';
-    bloodMap[bt] = (bloodMap[bt] || 0) + 1;
   });
 
   // Filtered members for printable roster
@@ -100,12 +72,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       'Divisão',
       'Status',
       'Telefone',
-      'Tipo Sanguíneo',
-      'Marca da Moto',
-      'Modelo da Moto',
-      'Placa',
+      'Email',
       'Data de Entrada',
-      'Contato Emergência'
+      'Data de Graduação'
     ];
 
     const rows = filteredRoster.map(m => [
@@ -116,12 +85,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       `"${m.divisaoName}"`,
       `"${m.status}"`,
       `"${m.phone}"`,
-      `"${m.bloodType}"`,
-      `"${m.motorcycle?.brand || ''}"`,
-      `"${m.motorcycle?.model || ''}"`,
-      `"${m.motorcycle?.plate || ''}"`,
+      `"${m.email || ''}"`,
       `"${m.entryDate}"`,
-      `"${m.emergencyContact?.name || ''} (${m.emergencyContact?.phone || ''})"`
+      `"${m.grupamentoGraduationDate || ''}"`
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
@@ -185,7 +151,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             Relatórios Detalhados & Estatísticas
           </h2>
           <p className="text-xs text-zinc-400 mt-1 max-w-xl">
-            Censo de grupamentos (Caveira, Subdiretor, Operacional Regional), divisões territoriais, prontidão de comboio e exportações.
+            Censo de grupamentos (Caveira, Subdiretor, Operacional Regional, Subdiretor/Caveira), divisões territoriais e exportações oficiais.
           </p>
         </div>
 
@@ -379,61 +345,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
       </div>
 
-      {/* Secondary Metrics: Blood & Motorcycle readiness */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 no-print">
-        {/* Blood Type Emergency Readiness */}
-        <div className="bg-[#12151c] border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2">
-              <HeartPulse size={16} className="text-red-500" />
-              Prontidão de Saúde & Tipagem Sanguínea
-            </h3>
-            <span className="text-xs text-zinc-400">Emergência de Estrada</span>
-          </div>
-
-          <div className="grid grid-cols-4 gap-2.5 pt-2">
-            {Object.entries(bloodMap).map(([bt, count]) => (
-              <div key={bt} className="bg-[#0b0d12] border border-zinc-800 p-3 rounded-xl text-center">
-                <span className="text-xs text-zinc-400 block font-mono">Tipo {bt}</span>
-                <span className="text-lg font-black text-red-400 font-mono">{count}</span>
-                <span className="text-[10px] text-zinc-500 block">{count === 1 ? 'irmão' : 'irmãos'}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Motorcycle Fleet Distribution */}
-        <div className="bg-[#12151c] border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2">
-              <Shield size={16} className="text-amber-500" />
-              Frota de Motocicletas Cadastradas
-            </h3>
-            <span className="text-xs text-zinc-400">Marcas em Rodagem</span>
-          </div>
-
-          <div className="space-y-2 pt-1">
-            {motoData.map((item) => {
-              const pct = Math.round((item.count / (totalMembers || 1)) * 100);
-              return (
-                <div key={item.brand} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-zinc-300">{item.brand}</span>
-                    <span className="text-zinc-400 font-mono">{item.count} motos ({pct}%)</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-red-600 to-amber-500 rounded-full"
-                      style={{ width: `${pct}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* OFFICIAL ROSTER PRINT SHEET / CENSO */}
       <div className="bg-[#12151c] border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-5 print-card">
         {/* Official Club Print Header */}
@@ -470,7 +381,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <select
             value={filterDivisao}
             onChange={(e) => setFilterDivisao(e.target.value)}
-            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-hidden focus:border-red-500"
+            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
           >
             <option value="all">Todas as Divisões ({divisoes.length})</option>
             {divisoes.map((d) => (
@@ -482,7 +393,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <select
             value={filterGrupamento}
             onChange={(e) => setFilterGrupamento(e.target.value)}
-            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-hidden focus:border-red-500"
+            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
           >
             <option value="all">Todos os Grupamentos</option>
             {DEFAULT_GRUPAMENTOS.map((g) => (
@@ -494,7 +405,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-hidden focus:border-red-500"
+            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
           >
             <option value="all">Todos os Status</option>
             <option value="Ativo">Ativo</option>
@@ -527,9 +438,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 <th className="py-3 px-3">Grupamento</th>
                 <th className="py-3 px-3">Divisão</th>
                 <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3">Sangue</th>
-                <th className="py-3 px-3">Motocicleta</th>
-                <th className="py-3 px-3">Contato</th>
+                <th className="py-3 px-3">Data Admissão</th>
+                <th className="py-3 px-3">Telefone</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
@@ -555,12 +465,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                       {m.status}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 font-mono font-bold text-red-400">
-                    {m.bloodType}
-                  </td>
-                  <td className="py-2.5 px-3 text-zinc-300">
-                    <div>{m.motorcycle?.brand} {m.motorcycle?.model}</div>
-                    <span className="text-[10px] font-mono text-zinc-500">{m.motorcycle?.plate}</span>
+                  <td className="py-2.5 px-3 text-zinc-300 font-mono">
+                    {new Date(m.entryDate).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="py-2.5 px-3 font-mono text-zinc-300">
                     {m.phone || '-'}
@@ -570,7 +476,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
               {filteredRoster.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-zinc-500">
+                  <td colSpan={7} className="text-center py-8 text-zinc-500">
                     Nenhum integrante encontrado com os filtros selecionados.
                   </td>
                 </tr>

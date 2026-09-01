@@ -53,17 +53,7 @@ export interface Divisao {
   description?: string;
 }
 
-export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'Não Informado';
-
 export type MemberStatus = 'Ativo' | 'Em Observação' | 'Licença' | 'Honorário';
-
-export interface Motorcycle {
-  brand: string;
-  model: string;
-  engineCc?: string;
-  plate: string;
-  year?: string;
-}
 
 export interface Member {
   id: string;
@@ -76,16 +66,8 @@ export interface Member {
   status: MemberStatus;
   phone: string;
   email?: string;
-  bloodType: BloodType;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  motorcycle: Motorcycle;
   entryDate: string; // Data de entrada no MC
   grupamentoGraduationDate?: string; // Data de formação no grupamento
-  avatarUrl?: string;
   observations?: string;
   createdAt: string;
   updatedAt: string;
@@ -105,7 +87,6 @@ export interface FilterState {
   divisaoId: string;
   grupamento: string;
   status: string;
-  bloodType: string;
   sortBy: 'vulgo' | 'name' | 'coleteNumber' | 'entryDate' | 'divisaoName';
   sortOrder: 'asc' | 'desc';
 }

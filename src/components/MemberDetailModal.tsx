@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Phone, HeartPulse, Bike, Calendar, Shield, MapPin, Edit3, Trash2, Printer, ExternalLink, Award } from 'lucide-react';
+import { X, Phone, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Mail } from 'lucide-react';
 import { Member } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 
@@ -38,7 +38,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   const yearsInClub = calculateYears(member.entryDate);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm overflow-y-auto">
       <div className="relative w-full max-w-2xl my-8 bg-[#11141a] border border-zinc-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top bar */}
         <div className="px-6 py-4 bg-[#181c24] border-b border-zinc-800 flex items-center justify-between no-print">
@@ -92,11 +92,18 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           {/* Header Profile Section */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 pb-6 border-b border-zinc-800">
             <div className="relative shrink-0">
-              <img
-                src={member.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'}
-                alt={member.vulgo}
-                className="w-28 h-28 rounded-2xl object-cover border-2 border-red-600 shadow-xl bg-zinc-800"
-              />
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1c2230] via-[#121620] to-[#0a0c10] border-2 border-red-600 shadow-xl flex flex-col items-center justify-center p-2 text-center">
+                {member.grupamento === 'Caveira' && <Skull size={40} className="text-red-500" />}
+                {member.grupamento === 'Subdiretor' && <Shield size={40} className="text-amber-500" />}
+                {member.grupamento === 'Operacional Regional' && <Shield size={40} className="text-blue-500" />}
+                {member.grupamento === 'Subdiretor / Caveira' && <Skull size={40} className="text-purple-400" />}
+                {member.grupamento !== 'Caveira' && member.grupamento !== 'Subdiretor' && member.grupamento !== 'Operacional Regional' && member.grupamento !== 'Subdiretor / Caveira' && (
+                  <Shield size={40} className="text-zinc-400" />
+                )}
+                <span className="text-[10px] font-mono font-bold text-amber-400 mt-1">
+                  {member.coleteNumber}
+                </span>
+              </div>
               <span className={`absolute -bottom-2 -right-2 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border shadow-md ${
                 member.status === 'Ativo' ? 'bg-emerald-950 border-emerald-700 text-emerald-400' : 'bg-amber-950 border-amber-700 text-amber-400'
               }`}>
@@ -131,11 +138,18 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                     <span className="text-[11px] text-amber-400 font-bold">({yearsInClub} {yearsInClub === 1 ? 'ano' : 'anos'} de MC)</span>
                   )}
                 </span>
+
+                {member.grupamentoGraduationDate && (
+                  <span className="flex items-center gap-1.5 text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700/60">
+                    <Award size={13} className="text-purple-400" />
+                    Graduação: <strong className="text-white">{new Date(member.grupamentoGraduationDate).toLocaleDateString('pt-BR')}</strong>
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Quick Contact Action */}
+          {/* Contact Details Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-[#151921] border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
               <div>
@@ -157,71 +171,18 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
             <div className="bg-[#151921] border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
               <div>
-                <span className="text-[11px] text-zinc-400 block">Tipo Sanguíneo</span>
-                <span className="text-base font-extrabold text-red-400 font-mono">{member.bloodType}</span>
+                <span className="text-[11px] text-zinc-400 block">E-mail Cadastrado</span>
+                <span className="text-sm font-semibold text-white truncate max-w-[200px]">{member.email || 'Não informado'}</span>
               </div>
-              <div className="w-9 h-9 rounded-lg bg-red-950/60 border border-red-800/80 flex items-center justify-center text-red-400">
-                <HeartPulse size={18} />
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Motorcycle details */}
-            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
-                <Bike size={16} />
-                <span>Motocicleta Oficial</span>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                  <span className="text-zinc-400">Marca / Modelo:</span>
-                  <span className="font-semibold text-white">
-                    {member.motorcycle?.brand} {member.motorcycle?.model || ''}
-                  </span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                  <span className="text-zinc-400">Cilindrada:</span>
-                  <span className="font-mono text-zinc-200">{member.motorcycle?.engineCc || 'Não informado'}</span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                  <span className="text-zinc-400">Placa:</span>
-                  <span className="font-mono font-bold text-amber-400 bg-black/40 px-2 py-0.5 rounded border border-zinc-800">
-                    {member.motorcycle?.plate || 'SEM PLACA'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Ano:</span>
-                  <span className="text-zinc-200">{member.motorcycle?.year || '-'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Emergency Info */}
-            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wider">
-                <HeartPulse size={16} />
-                <span>Contato de Emergência</span>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                  <span className="text-zinc-400">Nome:</span>
-                  <span className="font-semibold text-white">{member.emergencyContact?.name || 'Não cadastrado'}</span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-800/80 pb-1.5">
-                  <span className="text-zinc-400">Parentesco:</span>
-                  <span className="text-zinc-200">{member.emergencyContact?.relationship || '-'}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-400">Telefone:</span>
-                  <span className="font-mono font-semibold text-emerald-400">
-                    {member.emergencyContact?.phone || '-'}
-                  </span>
-                </div>
-              </div>
+              {member.email && (
+                <a
+                  href={`mailto:${member.email}`}
+                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                >
+                  <Mail size={13} />
+                  Enviar
+                </a>
+              )}
             </div>
           </div>
 
@@ -249,8 +210,8 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                 <p className="text-xs text-zinc-400">{member.divisaoName} • {member.grupamento}</p>
               </div>
               <div className="text-right">
-                <span className="text-[10px] text-zinc-500 block">SANGUE</span>
-                <span className="text-lg font-black text-red-500 font-mono">{member.bloodType}</span>
+                <span className="text-[10px] text-zinc-500 block">STATUS</span>
+                <span className="text-sm font-bold text-emerald-400 font-mono">{member.status}</span>
               </div>
             </div>
           </div>

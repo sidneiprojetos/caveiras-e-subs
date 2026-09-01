@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Printer, Shield, Skull, HeartPulse, MapPin, Phone, Search, Award, Check } from 'lucide-react';
+import { Printer, Shield, Skull, MapPin, Phone, Search } from 'lucide-react';
 import { Member, Divisao } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 
@@ -67,7 +67,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por Vulgo, Nome ou Colete..."
-            className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg pl-9 pr-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-hidden focus:border-red-500"
+            className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg pl-9 pr-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
           />
           <Search size={14} className="absolute left-3 top-2.5 text-zinc-500" />
         </div>
@@ -75,7 +75,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
         <select
           value={selectedDivisao}
           onChange={(e) => setSelectedDivisao(e.target.value)}
-          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-hidden focus:border-red-500 font-medium"
+          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium"
         >
           <option value="all">Todas as Divisões</option>
           {divisoes.map(d => (
@@ -86,7 +86,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
         <select
           value={selectedGrupamento}
           onChange={(e) => setSelectedGrupamento(e.target.value)}
-          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-hidden focus:border-red-500 font-medium"
+          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium"
         >
           <option value="all">Todos os Grupamentos</option>
           <option value="Caveira">Caveira</option>
@@ -122,7 +122,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
                     INSANOS M.C.
                   </h4>
                   <p className="text-[9px] text-zinc-400 uppercase tracking-widest">
-                    Credencial Oficial de Estrada
+                    Credencial Oficial
                   </p>
                 </div>
               </div>
@@ -132,13 +132,20 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
               </span>
             </div>
 
-            {/* Member Info & Photo */}
+            {/* Member Info & Insignia Crest */}
             <div className="flex gap-4 items-center">
-              <img
-                src={member.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'}
-                alt={member.vulgo}
-                className="w-20 h-24 rounded-xl object-cover border-2 border-red-600/80 shadow-md shrink-0 bg-zinc-800"
-              />
+              <div className="w-20 h-24 rounded-xl bg-gradient-to-br from-[#1b212e] via-[#10131b] to-[#07090d] border-2 border-red-600/80 shadow-md shrink-0 flex flex-col items-center justify-center p-2 text-center">
+                {member.grupamento === 'Caveira' && <Skull size={32} className="text-red-500" />}
+                {member.grupamento === 'Subdiretor' && <Shield size={32} className="text-amber-500" />}
+                {member.grupamento === 'Operacional Regional' && <Shield size={32} className="text-blue-500" />}
+                {member.grupamento === 'Subdiretor / Caveira' && <Skull size={32} className="text-purple-400" />}
+                {member.grupamento !== 'Caveira' && member.grupamento !== 'Subdiretor' && member.grupamento !== 'Operacional Regional' && member.grupamento !== 'Subdiretor / Caveira' && (
+                  <Shield size={32} className="text-zinc-400" />
+                )}
+                <span className="text-[10px] font-mono font-bold text-zinc-400 mt-1">
+                  {new Date(member.entryDate).getFullYear()}
+                </span>
+              </div>
 
               <div className="space-y-1.5 flex-1 min-w-0">
                 <p className="text-base font-black text-white font-cinzel truncate leading-tight">
@@ -155,7 +162,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             </div>
 
             {/* Details Footer */}
-            <div className="mt-4 pt-3 border-t border-zinc-800/80 grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="mt-4 pt-3 border-t border-zinc-800/80 grid grid-cols-2 gap-2 text-center text-xs">
               <div className="bg-black/40 p-1.5 rounded-lg border border-zinc-800/60">
                 <span className="text-[9px] text-zinc-500 block uppercase">Divisão</span>
                 <span className="font-bold text-zinc-200 truncate block text-[11px]">
@@ -164,24 +171,17 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
               </div>
 
               <div className="bg-black/40 p-1.5 rounded-lg border border-zinc-800/60">
-                <span className="text-[9px] text-zinc-500 block uppercase">Sangue</span>
-                <span className="font-bold text-red-500 font-mono text-[12px]">
-                  {member.bloodType}
-                </span>
-              </div>
-
-              <div className="bg-black/40 p-1.5 rounded-lg border border-zinc-800/60">
-                <span className="text-[9px] text-zinc-500 block uppercase">Entrada</span>
-                <span className="font-bold text-zinc-300 font-mono text-[10px]">
-                  {new Date(member.entryDate).getFullYear()}
+                <span className="text-[9px] text-zinc-500 block uppercase">Admissão</span>
+                <span className="font-bold text-zinc-300 font-mono text-[11px]">
+                  {new Date(member.entryDate).toLocaleDateString('pt-BR')}
                 </span>
               </div>
             </div>
 
-            {/* Machine & Emergency footnote */}
+            {/* Status footnote */}
             <div className="mt-3 flex items-center justify-between text-[10px] text-zinc-400 bg-zinc-900/80 px-2.5 py-1.5 rounded-lg border border-zinc-800">
               <span className="truncate">
-                🏍️ {member.motorcycle?.brand} {member.motorcycle?.model || ''} ({member.motorcycle?.plate || 'S/P'})
+                📞 {member.phone || 'Sem telefone'}
               </span>
               <span className="font-mono text-emerald-400 font-bold shrink-0 ml-2">
                 {member.status}
