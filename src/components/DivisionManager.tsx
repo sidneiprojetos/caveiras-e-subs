@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, MapPin, Users, Calendar, Shield, Edit2, Trash2, Check, AlertCircle, Sparkles, ChevronRight } from 'lucide-react';
+import { Plus, MapPin, Users, Calendar, Shield, Edit2, Trash2, Check, AlertCircle, Sparkles, ChevronRight, Printer } from 'lucide-react';
 import { Divisao, Member } from '../types';
 import { addActivityLog } from '../data/initialData';
+import { ConfirmDeleteModal, DeleteTargetInfo } from './ConfirmDeleteModal';
+import { printRosterReport } from '../utils/printService';
 
 interface DivisionManagerProps {
   divisoes: Divisao[];
@@ -26,6 +28,8 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDivisao, setEditingDivisao] = useState<Divisao | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTargetInfo | null>(null);
+  const [divisionToDelete, setDivisionToDelete] = useState<Divisao | null>(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -112,14 +116,32 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
       return;
     }
     const memberCount = members.filter(m => m.divisaoId === div.id).length;
+    setDivisionToDelete(div);
     if (memberCount > 0) {
-      alert(`Não é possível excluir a divisão "${div.name}" pois existem ${memberCount} integrante(s) vinculados a ela. Transfira os integrantes antes de excluir.`);
-      return;
+      setDeleteTarget({
+        type: 'divisao',
+        id: div.id,
+        title: `Divisão ${div.name} (${div.city}/${div.state})`,
+        subtitle: `Possui ${memberCount} integrante(s) atualmente associado(s).`,
+        blockedReason: `Não é possível excluir a divisão "${div.name}" pois existem ${memberCount} integrante(s) vinculados a ela. Altere a divisão dos integrantes antes de excluir.`
+      });
+    } else {
+      setDeleteTarget({
+        type: 'divisao',
+        id: div.id,
+        title: `Divisão ${div.name} (${div.city}/${div.state})`,
+        subtitle: 'Nenhum integrante vinculado no momento.',
+        warning: `Tem certeza que deseja excluir permanentemente a divisão "${div.name}"? Esta ação não pode ser desfeita.`
+      });
     }
+  };
 
-    if (window.confirm(`Tem certeza que deseja excluir permanentemente a divisão "${div.name}"?`)) {
-      onDeleteDivisao(div.id);
-      addActivityLog('EXCLUSAO', div.name, `Divisão "${div.name}" removida do sistema.`);
+  const handleConfirmDelete = () => {
+    if (divisionToDelete && (!deleteTarget || !deleteTarget.blockedReason)) {
+      onDeleteDivisao(divisionToDelete.id);
+      addActivityLog('EXCLUSAO', divisionToDelete.name, `Divisão "${divisionToDelete.name}" removida do sistema.`);
+      setDeleteTarget(null);
+      setDivisionToDelete(null);
     }
   };
 
@@ -133,7 +155,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
             <span className="text-xs uppercase font-bold tracking-widest text-red-400">Estrutura Territorial</span>
           </div>
           <h2 className="text-2xl font-black text-white font-cinzel tracking-wide">
-            Divisões do Insanos M.C.
+            Divisões • Gestão Operacional Sidnei
           </h2>
           <p className="text-xs text-zinc-400 mt-1 max-w-xl">
             Gerenciamento das divisões regionais (Umuarama Oeste, Leste, Cianorte, Cidade Gaúcha, Campo Mourão, Goioerê e novas expansões).
@@ -182,24 +204,22 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {isAdmin && (
-                      <>
-                        <button
-                          onClick={() => openEditModal(div)}
-                          title="Editar Divisão"
-                          className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white transition"
-                        >
-                          <Edit2 size={13} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(div)}
-                          title="Excluir Divisão"
-                          className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-red-950 text-zinc-400 hover:text-red-400 transition"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(div)}
+                      title={isAdmin ? "Editar Divisão" : "Editar Divisão (Requer PIN Admin)"}
+                      className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white transition"
+                    >
+                      <Edit2 size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(div)}
+                      title={isAdmin ? "Excluir Divisão" : "Excluir Divisão (Requer PIN Admin)"}
+                      className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-red-950 text-zinc-400 hover:text-red-400 transition"
+                    >
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 </div>
 
@@ -255,13 +275,25 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                   {divMembers.length === 1 ? '1 Integrante cadastrado' : `${divMembers.length} Integrantes`}
                 </span>
 
-                <button
-                  onClick={() => onSelectDivisionFilter(div.id)}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-red-400 hover:text-red-300 transition"
-                >
-                  <span>Ver Integrantes</span>
-                  <ChevronRight size={14} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => printRosterReport(divMembers, `Efetivo da Divisão ${div.name}`)}
+                    title="Imprimir Quadro desta Divisão"
+                    className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-amber-400 transition flex items-center gap-1 text-[11px]"
+                  >
+                    <Printer size={13} />
+                    <span>Imprimir</span>
+                  </button>
+
+                  <button
+                    onClick={() => onSelectDivisionFilter(div.id)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-red-400 hover:text-red-300 transition"
+                  >
+                    <span>Ver Integrantes</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -284,7 +316,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     {editingDivisao ? 'Editar Divisão' : 'Cadastrar Nova Divisão'}
                   </h3>
                   <p className="text-xs text-zinc-400">
-                    Insanos M.C. Noroeste Paranaense & Expansão
+                    Gestão Operacional Sidnei • Divisões & Expansão
                   </p>
                 </div>
               </div>
@@ -435,6 +467,16 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
           </div>
         </div>
       )}
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => {
+          setDeleteTarget(null);
+          setDivisionToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        target={deleteTarget}
+      />
     </div>
   );
 };

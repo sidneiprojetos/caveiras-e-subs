@@ -260,7 +260,7 @@ export const INITIAL_LOGS: ActivityLog[] = [
     timestamp: '2026-09-01T10:15:00.000Z',
     adminName: 'Diretoria Regional',
     action: 'ACESSO',
-    target: 'Sistema Insanos M.C.',
+    target: 'Sistema Gestão Operacional Sidnei',
     details: 'Inicialização do banco de dados operacional dos grupamentos e divisões.'
   },
   {

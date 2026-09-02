@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { printRosterReport } from '../utils/printService';
 
 interface ReportsViewProps {
   members: Member[];
@@ -60,7 +61,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
   // Handlers
   const handlePrint = () => {
-    window.print();
+    let filterLabel = 'Quadro Geral de Efetivo';
+    if (filterDivisao !== 'all') {
+      const d = divisoes.find(div => div.id === filterDivisao);
+      if (d) filterLabel = `Efetivo - Divisão ${d.name}`;
+    }
+    if (filterGrupamento !== 'all') {
+      filterLabel += ` (${filterGrupamento})`;
+    }
+    printRosterReport(filteredRoster, filterLabel);
   };
 
   const handleExportCSV = () => {
@@ -94,7 +103,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `insanos_mc_relatorio_efetivo_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `gestao_operacional_sidnei_efetivo_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -102,7 +111,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
   const handleExportJSON = () => {
     const data = {
-      app: 'Insanos M.C. - Sistema de Grupamentos e Divisões',
+      app: 'Gestão Operacional Sidnei - Sistema de Grupamentos e Divisões',
       exportedAt: new Date().toISOString(),
       divisoes,
       members
@@ -111,7 +120,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `insanos_mc_backup_completo_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `gestao_operacional_sidnei_backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -129,10 +138,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           setImportStatus('Backup restaurado com sucesso!');
           setTimeout(() => setImportStatus(''), 4000);
         } else {
-          alert('Arquivo JSON inválido. Estrutura de backup não reconhecida.');
+          setImportStatus('Erro: Arquivo JSON inválido. Estrutura de backup não reconhecida.');
+          setTimeout(() => setImportStatus(''), 5000);
         }
       } catch (err) {
-        alert('Erro ao processar o arquivo JSON.');
+        setImportStatus('Erro ao processar o arquivo JSON.');
+        setTimeout(() => setImportStatus(''), 5000);
       }
     };
     reader.readAsText(file);
@@ -352,14 +363,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-red-500 font-cinzel font-black text-xl tracking-wider">
-                INSANOS MOTORCYCLE CLUB
+                GESTÃO OPERACIONAL SIDNEI
               </span>
             </div>
             <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Relatório Oficial de Efetivo por Grupamentos e Divisões
             </p>
             <p className="text-[11px] text-zinc-500">
-              Regional Noroeste Paranaense • Emissão: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              Emissão: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
 
@@ -421,11 +432,20 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 setFilterGrupamento('all');
                 setFilterStatus('all');
               }}
-              className="text-xs text-red-400 hover:text-red-300 underline ml-auto"
+              className="text-xs text-red-400 hover:text-red-300 underline"
             >
               Limpar Filtros
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="ml-auto px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition shadow flex items-center gap-1.5"
+          >
+            <Printer size={13} />
+            <span>Imprimir Quadro</span>
+          </button>
         </div>
 
         {/* Table of Members */}
@@ -492,7 +512,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <div className="border-t border-black pt-2 font-bold">
                 DIRETORIA REGIONAL / COMANDO
               </div>
-              <p className="text-[10px] text-zinc-600">Insanos Motorcycle Club</p>
+              <p className="text-[10px] text-zinc-600">Gestão Operacional Sidnei</p>
             </div>
             <div>
               <div className="border-t border-black pt-2 font-bold">

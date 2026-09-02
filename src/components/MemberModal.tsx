@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Member, Divisao, MemberStatus, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
-import { X as CloseIcon, User as UserIcon, Shield as ShieldIcon, Check as CheckIcon, AlertTriangle as AlertIcon } from 'lucide-react';
+import { 
+  X as CloseIcon, 
+  User as UserIcon, 
+  Shield as ShieldIcon, 
+  Check as CheckIcon, 
+  AlertTriangle as AlertIcon,
+  ArrowRight,
+  ArrowLeft
+} from 'lucide-react';
 
 interface MemberModalProps {
   isOpen: boolean;
@@ -54,7 +62,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       setStatus(memberToEdit.status || 'Ativo');
       setPhone(memberToEdit.phone || '');
       setEmail(memberToEdit.email || '');
-      setEntryDate(memberToEdit.entryDate || '');
+      setEntryDate(memberToEdit.entryDate || new Date().toISOString().split('T')[0]);
       setGraduationDate(memberToEdit.grupamentoGraduationDate || '');
       setObservations(memberToEdit.observations || '');
     } else {
@@ -78,21 +86,41 @@ export const MemberModal: React.FC<MemberModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleNextTab = () => {
+    if (!vulgo.trim()) {
+      setFormError('Informe o Vulgo / Apelido do integrante no MC antes de prosseguir.');
+      return;
+    }
+    if (!name.trim()) {
+      setFormError('Informe o Nome Completo do integrante.');
+      return;
+    }
+    setFormError('');
+    setActiveTab('grupamento');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !vulgo.trim()) {
-      setFormError('Preencha o Nome Completo e o Vulgo (Apelido no MC).');
+    if (!vulgo.trim()) {
+      setFormError('Preencha o Vulgo (Apelido de Estrada / Operacional).');
       setActiveTab('geral');
       return;
     }
 
-    if (!divisaoId) {
-      setFormError('Selecione uma Divisão.');
+    if (!name.trim()) {
+      setFormError('Preencha o Nome Completo do integrante.');
       setActiveTab('geral');
       return;
     }
 
-    const selectedDivisao = divisoes.find(d => d.id === divisaoId);
+    const currentDivId = divisaoId || (divisoes[0]?.id || '');
+    if (!currentDivId) {
+      setFormError('Selecione ou cadastre uma Divisão de Lotação.');
+      setActiveTab('grupamento');
+      return;
+    }
+
+    const selectedDivisao = divisoes.find(d => d.id === currentDivId);
     const finalGrupamento = grupamento === 'Outro' ? (customGrupamento.trim() || 'Integrante') : grupamento;
 
     const newMember: Member = {
@@ -101,12 +129,12 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       vulgo: vulgo.trim(),
       coleteNumber: coleteNumber.trim() || `IMC-${Math.floor(1000 + Math.random() * 9000)}`,
       grupamento: finalGrupamento,
-      divisaoId,
+      divisaoId: currentDivId,
       divisaoName: selectedDivisao ? selectedDivisao.name : 'Regional',
       status,
       phone: phone.trim(),
       email: email.trim(),
-      entryDate,
+      entryDate: entryDate || new Date().toISOString().split('T')[0],
       grupamentoGraduationDate: graduationDate || undefined,
       observations: observations.trim(),
       createdAt: memberToEdit ? memberToEdit.createdAt : new Date().toISOString(),
@@ -125,20 +153,22 @@ export const MemberModal: React.FC<MemberModalProps> = ({
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-700"></div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-red-950/70 border border-red-800/80 flex items-center justify-center text-red-400 font-bold text-lg font-cinzel">
-              IMC
+              GOS
             </div>
             <div>
               <h2 className="text-lg font-bold text-white font-cinzel tracking-wide">
-                {memberToEdit ? 'Editar Integrante do Insanos M.C.' : 'Cadastrar Novo Integrante'}
+                {memberToEdit ? 'Editar Integrante • Gestão Operacional Sidnei' : 'Cadastrar Novo Integrante'}
               </h2>
               <p className="text-xs text-zinc-400">
-                {memberToEdit ? `Atualização de cadastro de ${memberToEdit.vulgo}` : 'Registro no quadro oficial de grupamentos e divisões'}
+                {memberToEdit ? `Atualização de cadastro de ${memberToEdit.vulgo}` : 'Registro no quadro de grupamentos e divisões'}
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-zinc-800 transition"
+            aria-label="Fechar"
           >
             <CloseIcon size={20} />
           </button>
@@ -192,10 +222,12 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                   <input
                     type="text"
                     value={vulgo}
-                    onChange={(e) => setVulgo(e.target.value)}
+                    onChange={(e) => {
+                      setVulgo(e.target.value);
+                      if (formError) setFormError('');
+                    }}
                     placeholder="Ex: Caveira Sidnei, Marreta, Falcão"
                     className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white font-semibold focus:outline-none focus:border-red-500"
-                    required
                   />
                   <span className="text-[11px] text-zinc-500">Nome de estrada gravado no colete</span>
                 </div>
@@ -207,10 +239,12 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (formError) setFormError('');
+                    }}
                     placeholder="Nome completo do integrante"
                     className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-500"
-                    required
                   />
                 </div>
               </div>
@@ -264,18 +298,18 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as MemberStatus)}
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-500"
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 cursor-pointer"
                   >
-                    <option value="Ativo">Ativo (Rodando / Frequente)</option>
-                    <option value="Em Observação">Em Observação</option>
-                    <option value="Licença">Licença Temporária</option>
-                    <option value="Honorário">Honorário</option>
+                    <option value="Ativo" className="bg-[#12151c]">Ativo (Rodando / Frequente)</option>
+                    <option value="Em Observação" className="bg-[#12151c]">Em Observação</option>
+                    <option value="Licença" className="bg-[#12151c]">Licença Temporária</option>
+                    <option value="Honorário" className="bg-[#12151c]">Honorário</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-zinc-300 mb-1">
-                    Data de Entrada no Insanos M.C.
+                    Data de Entrada / Admissão
                   </label>
                   <input
                     type="date"
@@ -302,10 +336,13 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                       <button
                         key={g.name}
                         type="button"
-                        onClick={() => setGrupamento(g.name)}
-                        className={`p-3.5 rounded-xl border text-left transition flex items-start gap-3 ${
+                        onClick={() => {
+                          setGrupamento(g.name);
+                          if (formError) setFormError('');
+                        }}
+                        className={`p-3.5 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${
                           isSelected
-                            ? `${g.badgeBg} ${g.borderColor} border-2 shadow-lg`
+                            ? `${g.badgeBg} ${g.borderColor} border-2 shadow-lg scale-[1.01]`
                             : 'bg-[#0c0e12] border-zinc-800 hover:border-zinc-700 text-zinc-300'
                         }`}
                       >
@@ -350,18 +387,20 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                   </label>
                   <select
                     value={divisaoId}
-                    onChange={(e) => setDivisaoId(e.target.value)}
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 font-semibold"
-                    required
+                    onChange={(e) => {
+                      setDivisaoId(e.target.value);
+                      if (formError) setFormError('');
+                    }}
+                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 font-semibold cursor-pointer"
                   >
                     {divisoes.map((d) => (
-                      <option key={d.id} value={d.id}>
+                      <option key={d.id} value={d.id} className="bg-[#12151c]">
                         {d.name} ({d.city} - {d.state})
                       </option>
                     ))}
                   </select>
                   <span className="text-[11px] text-zinc-500 mt-1 block">
-                    Novas divisões podem ser cadastradas na aba "Divisões"
+                    Divisões disponíveis: {divisoes.map(d => d.name).join(', ')}
                   </span>
                 </div>
 
@@ -406,16 +445,28 @@ export const MemberModal: React.FC<MemberModalProps> = ({
               Cancelar
             </button>
 
-            <div className="flex gap-2">
-              {activeTab === 'geral' ? (
+            <div className="flex items-center gap-2">
+              {activeTab === 'grupamento' && (
                 <button
                   type="button"
-                  onClick={() => setActiveTab('grupamento')}
-                  className="px-4 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg text-xs transition"
+                  onClick={() => setActiveTab('geral')}
+                  className="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold rounded-lg text-xs transition flex items-center gap-1.5"
                 >
-                  Próxima Etapa →
+                  <ArrowLeft size={14} />
+                  <span>Voltar</span>
                 </button>
-              ) : null}
+              )}
+
+              {activeTab === 'geral' && (
+                <button
+                  type="button"
+                  onClick={handleNextTab}
+                  className="px-4 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg text-xs transition flex items-center gap-1.5"
+                >
+                  <span>Próxima Etapa: Grupamento</span>
+                  <ArrowRight size={14} />
+                </button>
+              )}
 
               <button
                 type="submit"
@@ -431,3 +482,4 @@ export const MemberModal: React.FC<MemberModalProps> = ({
     </div>
   );
 };
+

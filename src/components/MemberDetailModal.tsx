@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Phone, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Mail } from 'lucide-react';
 import { Member } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { printMemberDossier } from '../utils/printService';
 
 interface MemberDetailModalProps {
   member: Member | null;
@@ -10,6 +12,7 @@ interface MemberDetailModalProps {
   onEdit: (member: Member) => void;
   onDelete: (memberId: string) => void;
   isAdmin: boolean;
+  onRequireAdmin?: () => void;
 }
 
 export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
@@ -18,15 +21,43 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   onClose,
   onEdit,
   onDelete,
-  isAdmin
+  isAdmin,
+  onRequireAdmin
 }) => {
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+
   if (!isOpen || !member) return null;
 
   const handlePrint = () => {
-    window.print();
+    printMemberDossier(member);
   };
 
-  const getCleanPhone = (p: string) => p.replace(/\D/g, '');
+  const getCleanPhone = (p: string) => {
+    const digits = p.replace(/\D/g, '');
+    return digits.startsWith('55') ? digits : `55${digits}`;
+  };
+
+  const handleEditClick = () => {
+    if (!isAdmin && onRequireAdmin) {
+      onRequireAdmin();
+      return;
+    }
+    onEdit(member);
+  };
+
+  const handleDeleteClick = () => {
+    if (!isAdmin && onRequireAdmin) {
+      onRequireAdmin();
+      return;
+    }
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(member.id);
+    setIsConfirmDeleteOpen(false);
+    onClose();
+  };
 
   const calculateYears = (dateStr: string) => {
     if (!dateStr) return null;
@@ -51,6 +82,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handlePrint}
               title="Imprimir Ficha Cadastral"
               className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition text-xs flex items-center gap-1.5 px-2.5"
@@ -59,26 +91,27 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               <span>Imprimir</span>
             </button>
 
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => onEdit(member)}
-                  className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition text-xs flex items-center gap-1.5 px-2.5"
-                >
-                  <Edit3 size={14} />
-                  <span>Editar</span>
-                </button>
-                <button
-                  onClick={() => onDelete(member.id)}
-                  className="p-1.5 rounded-lg bg-red-950/80 hover:bg-red-900 text-red-400 transition text-xs flex items-center gap-1.5 px-2.5 border border-red-800/60"
-                >
-                  <Trash2 size={14} />
-                  <span>Excluir</span>
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={handleEditClick}
+              title={isAdmin ? "Editar Dossiê" : "Editar (Requer PIN Admin)"}
+              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition text-xs flex items-center gap-1.5 px-2.5"
+            >
+              <Edit3 size={14} />
+              <span>Editar</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteClick}
+              title={isAdmin ? "Excluir Dossiê" : "Excluir (Requer PIN Admin)"}
+              className="p-1.5 rounded-lg bg-red-950/80 hover:bg-red-900 text-red-400 transition text-xs flex items-center gap-1.5 px-2.5 border border-red-800/60"
+            >
+              <Trash2 size={14} />
+              <span>Excluir</span>
+            </button>
 
             <button
+              type="button"
               onClick={onClose}
               className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition ml-2"
             >
@@ -158,7 +191,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               </div>
               {member.phone && (
                 <a
-                  href={`https://wa.me/55${getCleanPhone(member.phone)}`}
+                  href={`https://wa.me/${getCleanPhone(member.phone)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
@@ -201,7 +234,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           {/* Digital Card Preview */}
           <div className="bg-gradient-to-r from-zinc-900 via-[#181a20] to-zinc-900 border border-zinc-700/80 rounded-xl p-4 space-y-3 print-card">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-cinzel font-bold text-red-500 tracking-wider">INSANOS MOTO CLUBE</span>
+              <span className="font-cinzel font-bold text-red-500 tracking-wider">GESTÃO OPERACIONAL SIDNEI</span>
               <span className="font-mono text-zinc-400">CREDENTIAL ID #{member.coleteNumber}</span>
             </div>
             <div className="flex items-center justify-between pt-2">
@@ -227,6 +260,19 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           </button>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isConfirmDeleteOpen}
+        onClose={() => setIsConfirmDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        target={{
+          type: 'member',
+          id: member.id,
+          title: `${member.vulgo} (${member.name})`,
+          subtitle: `Colete: ${member.coleteNumber || 'S/N'} • Divisão: ${member.divisaoName} • Grupamento: ${member.grupamento}`,
+          warning: `Tem certeza que deseja excluir o cadastro de ${member.vulgo}? O registro será removido permanentemente.`
+        }}
+      />
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Printer, Shield, Skull, MapPin, Phone, Search } from 'lucide-react';
+import { Printer, Shield, Skull, MapPin, Phone, Search, FileText } from 'lucide-react';
 import { Member, Divisao } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { printIdCards, printMemberDossier } from '../utils/printService';
 
 interface DigitalIdCardViewProps {
   members: Member[];
@@ -30,7 +31,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
   });
 
   const handlePrint = () => {
-    window.print();
+    printIdCards(filteredMembers);
   };
 
   return (
@@ -46,7 +47,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             Carteirinhas & Credenciais Digitais
           </h2>
           <p className="text-xs text-zinc-400 mt-1 max-w-xl">
-            Credenciais oficiais para porte em viagens, comboios e validação de grupamento e divisão no Insanos M.C.
+            Credenciais oficiais para porte em viagens, comboios e validação de grupamento e divisão - Gestão Operacional Sidnei.
           </p>
         </div>
 
@@ -115,11 +116,11 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded bg-red-950/80 border border-red-800 flex items-center justify-center text-red-500 font-cinzel font-black text-xs">
-                  IMC
+                  GOS
                 </div>
                 <div>
                   <h4 className="text-xs font-black text-white font-cinzel tracking-wider">
-                    INSANOS M.C.
+                    Gestão Operacional Sidnei
                   </h4>
                   <p className="text-[9px] text-zinc-400 uppercase tracking-widest">
                     Credencial Oficial
@@ -178,14 +179,31 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
               </div>
             </div>
 
-            {/* Status footnote */}
+            {/* Status footnote and actions */}
             <div className="mt-3 flex items-center justify-between text-[10px] text-zinc-400 bg-zinc-900/80 px-2.5 py-1.5 rounded-lg border border-zinc-800">
               <span className="truncate">
                 📞 {member.phone || 'Sem telefone'}
               </span>
-              <span className="font-mono text-emerald-400 font-bold shrink-0 ml-2">
-                {member.status}
-              </span>
+              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                <button
+                  type="button"
+                  onClick={() => printMemberDossier(member)}
+                  title="Imprimir Dossiê Completo"
+                  className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition flex items-center gap-1 text-[9px] font-semibold"
+                >
+                  <FileText size={11} className="text-amber-400" />
+                  <span>Dossiê</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printIdCards([member])}
+                  title="Imprimir Esta Credencial"
+                  className="p-1 rounded bg-red-950/80 hover:bg-red-900 text-red-300 transition flex items-center gap-1 text-[9px] font-semibold"
+                >
+                  <Printer size={11} />
+                  <span>Imprimir</span>
+                </button>
+              </div>
             </div>
           </div>
         ))}

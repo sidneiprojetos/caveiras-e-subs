@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Users, MapPin, BarChart3, CreditCard, History, Lock, Unlock, 
-  ShieldCheck, ShieldAlert, Skull, Menu, X, PlusCircle
+  Skull, Menu, X, Database
 } from 'lucide-react';
 import { Divisao, Member } from '../types';
 
@@ -16,6 +16,7 @@ interface NavbarProps {
   divisoesCount: number;
   caveirasCount: number;
   onOpenAddMember: () => void;
+  onOpenCrudTest: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,7 +27,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   membersCount,
   divisoesCount,
   caveirasCount,
-  onOpenAddMember
+  onOpenAddMember,
+  onOpenCrudTest
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -56,10 +58,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-white font-cinzel tracking-wider leading-none">
-                  INSANOS <span className="text-red-500">M.C.</span>
+                  Gestão Operacional <span className="text-red-500">Sidnei</span>
                 </h1>
                 <span className="hidden sm:inline-block text-[10px] font-mono uppercase bg-red-950/80 text-red-300 px-2 py-0.5 rounded border border-red-800">
-                  Regional
+                  Operacional
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 font-medium tracking-wide">
@@ -86,9 +88,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Admin Control Button */}
-          <div className="flex items-center gap-2.5">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            {/* CRUD Test Button */}
             <button
+              type="button"
+              onClick={onOpenCrudTest}
+              title="Abrir Painel de Teste de CRUD"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition bg-[#151922] hover:bg-[#1c2230] text-emerald-400 border border-emerald-900/60 shadow-md"
+            >
+              <Database size={14} className="text-emerald-400" />
+              <span className="hidden sm:inline">Teste de CRUD</span>
+              <span className="sm:hidden">CRUD</span>
+            </button>
+
+            {/* Admin Control Button */}
+            <button
+              type="button"
               onClick={onOpenAdminAuth}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition border shadow-md ${
                 isAdmin
@@ -113,6 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Mobile Menu Toggle */}
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white"
             >

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { 
   Search, Filter, Plus, LayoutGrid, List, Phone, MapPin, 
-  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown
+  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer
 } from 'lucide-react';
 import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { ConfirmDeleteModal, DeleteTargetInfo } from './ConfirmDeleteModal';
+import { printRosterReport, printMemberDossier } from '../utils/printService';
 
 interface MemberListProps {
   members: Member[];
@@ -37,6 +39,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'coleteNumber' | 'entryDate' | 'divisaoName'>('vulgo');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
 
   // Filter and sort
   const filteredMembers = members.filter((m) => {
@@ -66,7 +69,10 @@ export const MemberList: React.FC<MemberListProps> = ({
     return 0;
   });
 
-  const getCleanPhone = (p: string) => p.replace(/\D/g, '');
+  const getCleanPhone = (p: string) => {
+    const digits = p.replace(/\D/g, '');
+    return digits.startsWith('55') ? digits : `55${digits}`;
+  };
 
   const handleAddClick = () => {
     if (!isAdmin) {
@@ -91,8 +97,13 @@ export const MemberList: React.FC<MemberListProps> = ({
       onRequireAdmin();
       return;
     }
-    if (window.confirm(`Tem certeza que deseja excluir o cadastro de ${m.vulgo} (${m.name})?`)) {
-      onDeleteMember(m.id);
+    setMemberToDelete(m);
+  };
+
+  const handleConfirmDelete = () => {
+    if (memberToDelete) {
+      onDeleteMember(memberToDelete.id);
+      setMemberToDelete(null);
     }
   };
 
@@ -106,6 +117,18 @@ export const MemberList: React.FC<MemberListProps> = ({
     setGrupamentoFilter('all');
     setStatusFilter('all');
     setSearch('');
+  };
+
+  const handlePrintList = () => {
+    let title = 'Lista de Integrantes';
+    if (currentDivisionFilter !== 'all') {
+      const d = divisoes.find(div => div.id === currentDivisionFilter);
+      if (d) title = `Integrantes - Divisão ${d.name}`;
+    }
+    if (grupamentoFilter !== 'all') {
+      title += ` (${grupamentoFilter})`;
+    }
+    printRosterReport(filteredMembers, title);
   };
 
   return (
@@ -132,8 +155,18 @@ export const MemberList: React.FC<MemberListProps> = ({
           )}
         </div>
 
-        {/* View Mode & Add Member Button */}
-        <div className="flex items-center gap-3 self-end lg:self-center">
+        {/* View Mode, Print & Add Member Button */}
+        <div className="flex items-center gap-2.5 self-end lg:self-center">
+          <button
+            type="button"
+            onClick={handlePrintList}
+            title="Imprimir Listagem Atual"
+            className="p-2.5 rounded-xl bg-[#0c0e12] hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold"
+          >
+            <Printer size={15} className="text-amber-400" />
+            <span className="hidden sm:inline">Imprimir</span>
+          </button>
+
           <div className="flex items-center bg-[#0c0e12] p-1 rounded-xl border border-zinc-800">
             <button
               onClick={() => setViewMode('grid')}
@@ -344,7 +377,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                 <div className="flex items-center gap-2">
                   {member.phone && (
                     <a
-                      href={`https://wa.me/55${getCleanPhone(member.phone)}`}
+                      href={`https://wa.me/${getCleanPhone(member.phone)}`}
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -361,6 +394,18 @@ export const MemberList: React.FC<MemberListProps> = ({
 
                 <div className="flex items-center gap-1">
                   <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      printMemberDossier(member);
+                    }}
+                    title="Imprimir Dossiê do Integrante"
+                    className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-amber-400 transition"
+                  >
+                    <Printer size={13} />
+                  </button>
+
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelectMember(member);
@@ -371,24 +416,22 @@ export const MemberList: React.FC<MemberListProps> = ({
                     <Eye size={13} />
                   </button>
 
-                  {isAdmin && (
-                    <>
-                      <button
-                        onClick={(e) => handleEditClick(member, e)}
-                        title="Editar Integrante"
-                        className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition"
-                      >
-                        <Edit3 size={13} />
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteClick(member, e)}
-                        title="Excluir Integrante"
-                        className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-950 text-zinc-400 hover:text-red-400 transition"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </>
-                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => handleEditClick(member, e)}
+                    title={isAdmin ? "Editar Integrante" : "Editar Integrante (Requer PIN Admin)"}
+                    className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition"
+                  >
+                    <Edit3 size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteClick(member, e)}
+                    title={isAdmin ? "Excluir Integrante" : "Excluir Integrante (Requer PIN Admin)"}
+                    className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-950 text-zinc-400 hover:text-red-400 transition"
+                  >
+                    <Trash2 size={13} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -461,7 +504,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                       <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                         {m.phone && (
                           <a
-                            href={`https://wa.me/55${getCleanPhone(m.phone)}`}
+                            href={`https://wa.me/${getCleanPhone(m.phone)}`}
                             target="_blank"
                             rel="noreferrer"
                             className="p-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 transition"
@@ -472,6 +515,15 @@ export const MemberList: React.FC<MemberListProps> = ({
                         )}
 
                         <button
+                          type="button"
+                          onClick={() => printMemberDossier(m)}
+                          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-amber-400 transition"
+                          title="Imprimir Dossiê"
+                        >
+                          <Printer size={13} />
+                        </button>
+
+                        <button
                           onClick={() => onSelectMember(m)}
                           className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition"
                           title="Ver Ficha"
@@ -479,24 +531,22 @@ export const MemberList: React.FC<MemberListProps> = ({
                           <Eye size={13} />
                         </button>
 
-                        {isAdmin && (
-                          <>
-                            <button
-                              onClick={(e) => handleEditClick(m, e)}
-                              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition"
-                              title="Editar"
-                            >
-                              <Edit3 size={13} />
-                            </button>
-                            <button
-                              onClick={(e) => handleDeleteClick(m, e)}
-                              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-950 text-zinc-400 hover:text-red-400 transition"
-                              title="Excluir"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </>
-                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => handleEditClick(m, e)}
+                          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 transition"
+                          title={isAdmin ? "Editar" : "Editar (Requer PIN Admin)"}
+                        >
+                          <Edit3 size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteClick(m, e)}
+                          className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-950 text-zinc-400 hover:text-red-400 transition"
+                          title={isAdmin ? "Excluir" : "Excluir (Requer PIN Admin)"}
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -535,6 +585,23 @@ export const MemberList: React.FC<MemberListProps> = ({
           </div>
         </div>
       )}
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(memberToDelete)}
+        onClose={() => setMemberToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        target={
+          memberToDelete
+            ? {
+                type: 'member',
+                id: memberToDelete.id,
+                title: `${memberToDelete.vulgo} (${memberToDelete.name})`,
+                subtitle: `Colete: ${memberToDelete.coleteNumber || 'S/N'} • Divisão: ${memberToDelete.divisaoName} • Grupamento: ${memberToDelete.grupamento}`,
+                warning: `Tem certeza que deseja excluir o cadastro de ${memberToDelete.vulgo}? Esta ação não pode ser desfeita.`
+              }
+            : null
+        }
+      />
     </div>
   );
 };

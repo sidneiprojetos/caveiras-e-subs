@@ -14,6 +14,8 @@ import { AuditLogsView } from './components/AuditLogsView';
 import { MemberModal } from './components/MemberModal';
 import { MemberDetailModal } from './components/MemberDetailModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
+import { CrudTestModal } from './components/CrudTestModal';
+import { PrintPreviewModal } from './components/PrintPreviewModal';
 import { CheckCircle, AlertTriangle, ShieldCheck, Skull } from 'lucide-react';
 
 export default function App() {
@@ -31,6 +33,7 @@ export default function App() {
     return localStorage.getItem('insanos_mc_is_admin') === 'true';
   });
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
+  const [isCrudTestModalOpen, setIsCrudTestModalOpen] = useState<boolean>(false);
 
   // Member Modals
   const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);
@@ -83,7 +86,7 @@ export default function App() {
       updatedList = [member, ...members];
       const newLogs = addActivityLog('CADASTRO', member.vulgo, `Novo integrante cadastrado: ${member.vulgo} (${member.grupamento}) na Divisão ${member.divisaoName}.`);
       setLogs(newLogs);
-      showToast(`Integrante ${member.vulgo} cadastrado no Insanos M.C.!`);
+      showToast(`Integrante ${member.vulgo} cadastrado na Gestão Operacional Sidnei!`);
     }
 
     handleSaveMembers(updatedList);
@@ -213,6 +216,7 @@ export default function App() {
           setMemberToEdit(null);
           setIsMemberModalOpen(true);
         }}
+        onOpenCrudTest={() => setIsCrudTestModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -299,6 +303,7 @@ export default function App() {
           setSelectedMemberDetail(null);
         }}
         isAdmin={isAdmin}
+        onRequireAdmin={() => setIsAdminModalOpen(true)}
       />
 
       <AdminAuthModal
@@ -309,13 +314,27 @@ export default function App() {
         onLogout={handleAdminLogout}
       />
 
+      <CrudTestModal
+        isOpen={isCrudTestModalOpen}
+        onClose={() => setIsCrudTestModalOpen(false)}
+        members={members}
+        divisoes={divisoes}
+        onAddOrUpdateMember={handleAddOrUpdateMember}
+        onDeleteMember={handleDeleteMember}
+        onAddDivisao={handleAddDivisao}
+        onDeleteDivisao={handleDeleteDivisao}
+        isAdmin={isAdmin}
+        onRequireAdmin={() => setIsAdminModalOpen(true)}
+      />
+
+      <PrintPreviewModal />
+
       {/* Footer */}
       <footer className="border-t border-zinc-800/80 bg-[#08090d] py-6 text-xs text-zinc-500 text-center no-print mt-auto">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Skull size={16} className="text-red-600" />
-            <span className="font-cinzel font-bold text-zinc-400">INSANOS M.C.</span>
-            <span>• Regional Noroeste Paranaense</span>
+            <span className="font-cinzel font-bold text-zinc-400">Gestão Operacional Sidnei</span>
           </div>
           <p className="text-[11px]">
             Divisões: Umuarama Oeste, Umuarama Leste, Cianorte, Cidade Gaúcha, Campo Mourão e Goioerê
