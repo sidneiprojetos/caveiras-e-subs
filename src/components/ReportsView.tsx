@@ -74,9 +74,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
   const handleExportCSV = () => {
     const headers = [
-      'Vulgo',
+      'Nome de Colete',
       'Nome Completo',
-      'Matrícula Colete',
       'Grupamento',
       'Divisão',
       'Status',
@@ -89,7 +88,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     const rows = filteredRoster.map(m => [
       `"${m.vulgo}"`,
       `"${m.name}"`,
-      `"${m.coleteNumber}"`,
       `"${m.grupamento}"`,
       `"${m.divisaoName}"`,
       `"${m.status}"`,
@@ -453,8 +451,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <table className="w-full text-left text-xs border-collapse print-table">
             <thead>
               <tr className="border-b border-zinc-800 bg-[#0e1117] text-zinc-400 uppercase font-semibold">
-                <th className="py-3 px-3">Colete / ID</th>
-                <th className="py-3 px-3">Vulgo & Nome</th>
+                <th className="py-3 px-3">Nome de Colete & Nome</th>
                 <th className="py-3 px-3">Grupamento</th>
                 <th className="py-3 px-3">Divisão</th>
                 <th className="py-3 px-3">Status</th>
@@ -465,9 +462,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <tbody className="divide-y divide-zinc-800/60">
               {filteredRoster.map((m) => (
                 <tr key={m.id} className="hover:bg-zinc-800/30 transition">
-                  <td className="py-2.5 px-3 font-mono font-bold text-amber-400">
-                    {m.coleteNumber}
-                  </td>
                   <td className="py-2.5 px-3">
                     <strong className="text-white block font-medium">{m.vulgo}</strong>
                     <span className="text-[11px] text-zinc-400">{m.name}</span>

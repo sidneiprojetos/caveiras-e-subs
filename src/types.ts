@@ -58,8 +58,8 @@ export type MemberStatus = 'Ativo' | 'Em Observação' | 'Licença' | 'Honorári
 export interface Member {
   id: string;
   name: string;
-  vulgo: string; // Apelido / Road Name
-  coleteNumber: string; // Número do colete ou registro
+  vulgo: string; // Nome de Colete / Apelido Operacional
+  coleteNumber?: string; // Campo legado mantido para compatibilidade
   grupamento: string; // 'Caveira' | 'Subdiretor' | 'Operacional Regional' | 'Subdiretor / Caveira' | etc.
   divisaoId: string;
   divisaoName: string;
@@ -87,6 +87,18 @@ export interface FilterState {
   divisaoId: string;
   grupamento: string;
   status: string;
-  sortBy: 'vulgo' | 'name' | 'coleteNumber' | 'entryDate' | 'divisaoName';
+  sortBy: 'vulgo' | 'name' | 'entryDate' | 'divisaoName';
   sortOrder: 'asc' | 'desc';
 }
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'OPERADOR';
+  status: 'active' | 'suspended';
+  permissions: string[];
+  grantedAt: string;
+  lastLogin?: string;
+}
+

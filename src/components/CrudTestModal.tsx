@@ -48,7 +48,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
     {
       id: 'create',
       name: '1. CREATE (Cadastrar Integrante)',
-      description: 'Cria um novo integrante de teste com grupamento Caveira e Colete IMC-TEST99.',
+      description: 'Cria um novo integrante de teste com grupamento Caveira na divisão selecionada.',
       status: 'idle'
     },
     {
@@ -92,7 +92,6 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
     logMessage('Iniciando Teste Automatizado de CRUD - Gestão Operacional Sidnei...');
 
     const testId = `test-member-${Date.now()}`;
-    const testColete = `IMC-T${Math.floor(1000 + Math.random() * 9000)}`;
     const testDivisao = divisoes[0] || { id: 'div-umuarama-oeste', name: 'Umuarama Oeste', city: 'Umuarama', state: 'PR', active: true };
 
     const nowIso = new Date().toISOString();
@@ -100,13 +99,12 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       id: testId,
       vulgo: 'Caveira de Teste',
       name: 'Carlos Alberto de Teste',
-      coleteNumber: testColete,
       divisaoId: testDivisao.id,
       divisaoName: testDivisao.name,
       grupamento: 'Caveira',
       status: 'Ativo',
       phone: '(44) 99999-8888',
-      email: 'teste.crud@insanosmc.com.br',
+      email: 'teste.crud@gestao.com.br',
       entryDate: new Date().toISOString().split('T')[0],
       grupamentoGraduationDate: new Date().toISOString().split('T')[0],
       observations: 'Registro temporário gerado para validação de testes do sistema CRUD.',
@@ -117,7 +115,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
     // Step 1: CREATE
     try {
       setTestSteps(prev => prev.map(s => s.id === 'create' ? { ...s, status: 'running' } : s));
-      logMessage(`[1/4] Executando CREATE: Cadastrando "${initialTestMember.vulgo}" (${testColete})...`);
+      logMessage(`[1/4] Executando CREATE: Cadastrando "${initialTestMember.vulgo}"...`);
       await sleep(600);
 
       onAddOrUpdateMember(initialTestMember);
@@ -127,10 +125,10 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       setTestSteps(prev => prev.map(s => s.id === 'create' ? { 
         ...s, 
         status: 'success', 
-        details: `Sucesso: Integrante ID ${testId} criado no localStorage!`,
+        details: `Sucesso: Integrante ID ${testId} salvo e sincronizado no Firestore Nuvem!`,
         timestamp: new Date().toLocaleTimeString('pt-BR')
       } : s));
-      logMessage(`✓ CREATE Concluído com sucesso! Colete: ${testColete}`);
+      logMessage(`✓ CREATE Concluído com sucesso! Registro: ${initialTestMember.vulgo}`);
     } catch (err: any) {
       setTestSteps(prev => prev.map(s => s.id === 'create' ? { ...s, status: 'failed', details: err?.message || 'Erro ao criar' } : s));
       logMessage(`✗ Falha no CREATE: ${err?.message}`);
@@ -190,7 +188,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       setTestSteps(prev => prev.map(s => s.id === 'update' ? { 
         ...s, 
         status: 'success', 
-        details: `Sucesso: Vulgo e Grupamento atualizados para "${updatedMember.grupamento}"!`,
+        details: `Sucesso: Nome de Colete e Grupamento atualizados para "${updatedMember.grupamento}"!`,
         timestamp: new Date().toLocaleTimeString('pt-BR')
       } : s));
       logMessage(`✓ UPDATE Concluído com sucesso! Novos dados salvos.`);
@@ -237,7 +235,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       {
         id: 'create',
         name: '1. CREATE (Cadastrar Integrante)',
-        description: 'Cria um novo integrante de teste com grupamento Caveira e Colete IMC-TEST99.',
+        description: 'Cria um novo integrante de teste com grupamento Caveira na divisão selecionada.',
         status: 'idle'
       },
       {
@@ -275,13 +273,12 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       id: testId,
       vulgo: `Caveira Teste ${Math.floor(10 + Math.random() * 90)}`,
       name: 'Membro Criado pelo Teste Manual',
-      coleteNumber: `IMC-${Math.floor(1000 + Math.random() * 9000)}`,
       divisaoId: testDivisao.id,
       divisaoName: testDivisao.name,
       grupamento: 'Caveira',
       status: 'Ativo',
       phone: '(44) 99123-4567',
-      email: 'membro.teste@insanosmc.com.br',
+      email: 'membro.teste@gestao.com.br',
       entryDate: new Date().toISOString().split('T')[0],
       observations: 'Criado manualmente pelo painel de Teste de CRUD.',
       createdAt: nowIso,

@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admins full management
+    match /admins/{adminId} {
+      allow read, write: if true;
+    }
+    // Members directory
+    match /members/{memberId} {
+      allow read, write: if true;
+    }
+    // Divisions management
+    match /divisoes/{divisaoId} {
+      allow read, write: if true;
+    }
+    // Activity and audit logs
+    match /logs/{logId} {
+      allow read, write: if true;
+    }
+    // System configuration and settings
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
+    // Catch-all
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

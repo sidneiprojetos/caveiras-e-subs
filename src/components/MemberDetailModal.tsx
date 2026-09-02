@@ -75,7 +75,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
         <div className="px-6 py-4 bg-[#181c24] border-b border-zinc-800 flex items-center justify-between no-print">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-zinc-800 text-amber-400 border border-zinc-700">
-              {member.coleteNumber}
+              {member.divisaoName}
             </span>
             <span className="text-xs text-zinc-400">Dossiê do Integrante</span>
           </div>
@@ -133,9 +133,6 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                 {member.grupamento !== 'Caveira' && member.grupamento !== 'Subdiretor' && member.grupamento !== 'Operacional Regional' && member.grupamento !== 'Subdiretor / Caveira' && (
                   <Shield size={40} className="text-zinc-400" />
                 )}
-                <span className="text-[10px] font-mono font-bold text-amber-400 mt-1">
-                  {member.coleteNumber}
-                </span>
               </div>
               <span className={`absolute -bottom-2 -right-2 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border shadow-md ${
                 member.status === 'Ativo' ? 'bg-emerald-950 border-emerald-700 text-emerald-400' : 'bg-amber-950 border-amber-700 text-amber-400'
@@ -235,7 +232,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           <div className="bg-gradient-to-r from-zinc-900 via-[#181a20] to-zinc-900 border border-zinc-700/80 rounded-xl p-4 space-y-3 print-card">
             <div className="flex items-center justify-between text-xs">
               <span className="font-cinzel font-bold text-red-500 tracking-wider">GESTÃO OPERACIONAL SIDNEI</span>
-              <span className="font-mono text-zinc-400">CREDENTIAL ID #{member.coleteNumber}</span>
+              <span className="font-mono text-zinc-400">ID REGISTRO #{member.id.substring(0, 8).toUpperCase()}</span>
             </div>
             <div className="flex items-center justify-between pt-2">
               <div>
@@ -269,7 +266,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           type: 'member',
           id: member.id,
           title: `${member.vulgo} (${member.name})`,
-          subtitle: `Colete: ${member.coleteNumber || 'S/N'} • Divisão: ${member.divisaoName} • Grupamento: ${member.grupamento}`,
+          subtitle: `Divisão: ${member.divisaoName} • Grupamento: ${member.grupamento}`,
           warning: `Tem certeza que deseja excluir o cadastro de ${member.vulgo}? O registro será removido permanentemente.`
         }}
       />

@@ -37,7 +37,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'coleteNumber' | 'entryDate' | 'divisaoName'>('vulgo');
+  const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'entryDate' | 'divisaoName'>('vulgo');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
 
@@ -54,9 +54,8 @@ export const MemberList: React.FC<MemberListProps> = ({
       const q = search.toLowerCase();
       const matchName = m.name.toLowerCase().includes(q);
       const matchVulgo = m.vulgo.toLowerCase().includes(q);
-      const matchColete = m.coleteNumber.toLowerCase().includes(q);
       const matchCity = m.divisaoName?.toLowerCase().includes(q);
-      if (!matchName && !matchVulgo && !matchColete && !matchCity) return false;
+      if (!matchName && !matchVulgo && !matchCity) return false;
     }
     return true;
   }).sort((a, b) => {
@@ -141,7 +140,7 @@ export const MemberList: React.FC<MemberListProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por Vulgo, Nome, Colete, Divisão..."
+            placeholder="Buscar por Nome de Colete, Nome, Divisão..."
             className="w-full bg-[#0c0e12] border border-zinc-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 transition"
           />
           <Search size={16} className="absolute left-3.5 top-3 text-zinc-500 pointer-events-none" />
@@ -263,9 +262,8 @@ export const MemberList: React.FC<MemberListProps> = ({
             onChange={(e) => setSortBy(e.target.value as any)}
             className="bg-transparent text-zinc-200 font-medium focus:outline-none cursor-pointer"
           >
-            <option value="vulgo" className="bg-[#12151c]">Vulgo (Nome de Guerra)</option>
+            <option value="vulgo" className="bg-[#12151c]">Nome de Colete</option>
             <option value="name" className="bg-[#12151c]">Nome Completo</option>
-            <option value="coleteNumber" className="bg-[#12151c]">Número do Colete</option>
             <option value="divisaoName" className="bg-[#12151c]">Divisão</option>
             <option value="entryDate" className="bg-[#12151c]">Data de Entrada</option>
           </select>
@@ -329,8 +327,8 @@ export const MemberList: React.FC<MemberListProps> = ({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="font-mono text-[11px] font-bold text-amber-400">
-                        {member.coleteNumber}
+                      <span className="text-[11px] font-semibold text-zinc-400 truncate">
+                        {member.divisaoName}
                       </span>
                       <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
                         member.status === 'Ativo' ? 'text-emerald-400 bg-emerald-950/60 border border-emerald-800' : 'text-amber-400 bg-amber-950/60 border border-amber-800'
@@ -446,8 +444,7 @@ export const MemberList: React.FC<MemberListProps> = ({
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-[#0e1117] text-zinc-400 uppercase font-semibold">
-                  <th className="py-3 px-4">Colete</th>
-                  <th className="py-3 px-4">Vulgo / Integrante</th>
+                  <th className="py-3 px-4">Nome de Colete / Nome</th>
                   <th className="py-3 px-4">Grupamento</th>
                   <th className="py-3 px-4">Divisão</th>
                   <th className="py-3 px-4">Status</th>
@@ -462,9 +459,6 @@ export const MemberList: React.FC<MemberListProps> = ({
                     onClick={() => onSelectMember(m)}
                     className="hover:bg-zinc-800/40 transition cursor-pointer group"
                   >
-                    <td className="py-3 px-4 font-mono font-bold text-amber-400">
-                      {m.coleteNumber}
-                    </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-lg bg-[#181c24] border border-red-600/70 flex items-center justify-center text-red-400 shrink-0">
@@ -596,7 +590,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                 type: 'member',
                 id: memberToDelete.id,
                 title: `${memberToDelete.vulgo} (${memberToDelete.name})`,
-                subtitle: `Colete: ${memberToDelete.coleteNumber || 'S/N'} • Divisão: ${memberToDelete.divisaoName} • Grupamento: ${memberToDelete.grupamento}`,
+                subtitle: `Divisão: ${memberToDelete.divisaoName} • Grupamento: ${memberToDelete.grupamento}`,
                 warning: `Tem certeza que deseja excluir o cadastro de ${memberToDelete.vulgo}? Esta ação não pode ser desfeita.`
               }
             : null

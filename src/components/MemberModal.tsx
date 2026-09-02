@@ -30,7 +30,6 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   
   const [name, setName] = useState('');
   const [vulgo, setVulgo] = useState('');
-  const [coleteNumber, setColeteNumber] = useState('');
   const [grupamento, setGrupamento] = useState<string>('Caveira');
   const [customGrupamento, setCustomGrupamento] = useState('');
   const [divisaoId, setDivisaoId] = useState('');
@@ -47,7 +46,6 @@ export const MemberModal: React.FC<MemberModalProps> = ({
     if (memberToEdit) {
       setName(memberToEdit.name || '');
       setVulgo(memberToEdit.vulgo || '');
-      setColeteNumber(memberToEdit.coleteNumber || '');
       
       const isPredefined = DEFAULT_GRUPAMENTOS.some(g => g.name === memberToEdit.grupamento);
       if (isPredefined) {
@@ -69,7 +67,6 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       // Defaults for new member
       setName('');
       setVulgo('');
-      setColeteNumber(`IMC-${Math.floor(1000 + Math.random() * 9000)}`);
       setGrupamento('Caveira');
       setCustomGrupamento('');
       setDivisaoId(divisoes[0]?.id || '');
@@ -88,7 +85,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
 
   const handleNextTab = () => {
     if (!vulgo.trim()) {
-      setFormError('Informe o Vulgo / Apelido do integrante no MC antes de prosseguir.');
+      setFormError('Informe o Nome de Colete do integrante antes de prosseguir.');
       return;
     }
     if (!name.trim()) {
@@ -102,7 +99,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!vulgo.trim()) {
-      setFormError('Preencha o Vulgo (Apelido de Estrada / Operacional).');
+      setFormError('Preencha o Nome de Colete do integrante.');
       setActiveTab('geral');
       return;
     }
@@ -127,7 +124,6 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       id: memberToEdit ? memberToEdit.id : `mem-${Date.now()}`,
       name: name.trim(),
       vulgo: vulgo.trim(),
-      coleteNumber: coleteNumber.trim() || `IMC-${Math.floor(1000 + Math.random() * 9000)}`,
       grupamento: finalGrupamento,
       divisaoId: currentDivId,
       divisaoName: selectedDivisao ? selectedDivisao.name : 'Regional',
@@ -186,7 +182,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
             }`}
           >
             <UserIcon size={15} />
-            1. Dados Pessoais & Vulgo
+            1. Dados Pessoais & Nome de Colete
           </button>
           <button
             type="button"
@@ -217,7 +213,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-300 mb-1">
-                    Vulgo / Apelido no M.C. <span className="text-red-500">*</span>
+                    Nome de Colete <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -229,7 +225,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                     placeholder="Ex: Caveira Sidnei, Marreta, Falcão"
                     className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white font-semibold focus:outline-none focus:border-red-500"
                   />
-                  <span className="text-[11px] text-zinc-500">Nome de estrada gravado no colete</span>
+                  <span className="text-[11px] text-zinc-500">Identificação operacional / nome de colete</span>
                 </div>
 
                 <div>
@@ -249,20 +245,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">
-                    Número do Colete / Matrícula
-                  </label>
-                  <input
-                    type="text"
-                    value={coleteNumber}
-                    onChange={(e) => setColeteNumber(e.target.value)}
-                    placeholder="Ex: IMC-0142"
-                    className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm font-mono text-amber-400 font-bold focus:outline-none focus:border-red-500"
-                  />
-                </div>
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-300 mb-1">
                     Telefone / WhatsApp

@@ -1,11 +1,11 @@
 import React from 'react';
 import { 
   Users, MapPin, BarChart3, CreditCard, History, Lock, Unlock, 
-  Skull, Menu, X, Database
+  Skull, Menu, X, Database, ShieldCheck, Sparkles
 } from 'lucide-react';
 import { Divisao, Member } from '../types';
 
-export type ActiveTab = 'integrantes' | 'divisoes' | 'relatorios' | 'carteirinhas' | 'auditoria';
+export type ActiveTab = 'integrantes' | 'divisoes' | 'relatorios' | 'carteirinhas' | 'auditoria' | 'gemini_ia';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -17,6 +17,8 @@ interface NavbarProps {
   caveirasCount: number;
   onOpenAddMember: () => void;
   onOpenCrudTest: () => void;
+  isFirestoreConnected?: boolean;
+  adminEmail?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -28,7 +30,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   divisoesCount,
   caveirasCount,
   onOpenAddMember,
-  onOpenCrudTest
+  onOpenCrudTest,
+  isFirestoreConnected = true,
+  adminEmail = 'imc.sidnei@gmail.com'
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -37,6 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'divisoes', label: 'Divisões', icon: <MapPin size={16} />, badge: String(divisoesCount) },
     { id: 'relatorios', label: 'Relatórios & Estatísticas', icon: <BarChart3 size={16} /> },
     { id: 'carteirinhas', label: 'Credenciais', icon: <CreditCard size={16} /> },
+    { id: 'gemini_ia', label: 'Inteligência Gemini', icon: <Sparkles size={16} className="text-amber-400" />, badge: '3.8' },
     { id: 'auditoria', label: 'Auditoria', icon: <History size={16} /> },
   ];
 
@@ -90,6 +95,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Firestore Cloud Status Badge */}
+            <div 
+              title={isFirestoreConnected ? "Conectado ao Firebase Firestore (Sincronização em tempo real na nuvem)" : "Conectando ao Firestore..."}
+              className={`hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold border shadow-sm transition ${
+                isFirestoreConnected
+                  ? 'bg-orange-950/40 border-orange-800/70 text-orange-200'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${isFirestoreConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-spin'}`} />
+              <span className="text-[11px] font-mono tracking-tight">
+                Firestore <span className="text-emerald-400 font-bold">Nuvem</span>
+              </span>
+            </div>
+
             {/* CRUD Test Button */}
             <button
               type="button"
@@ -102,26 +122,43 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="sm:hidden">CRUD</span>
             </button>
 
+            {/* Admin Profile Badge */}
+            {isAdmin && (
+              <div 
+                title="Administrador Full registrado no Firebase Firestore"
+                className="hidden xl:flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs bg-red-950/50 border border-red-800/80 text-red-200 shadow-sm"
+              >
+                <ShieldCheck size={14} className="text-red-400 shrink-0" />
+                <span className="font-mono text-[11px] text-zinc-300 font-semibold truncate max-w-[140px]">
+                  {adminEmail}
+                </span>
+                <span className="text-[9px] bg-red-600 text-white font-black tracking-widest px-1.5 py-0.5 rounded uppercase">
+                  FULL
+                </span>
+              </div>
+            )}
+
             {/* Admin Control Button */}
             <button
               type="button"
               onClick={onOpenAdminAuth}
+              title={isAdmin ? "Administrador Full Ativo no Firebase" : "Fazer login administrativo"}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition border shadow-md ${
                 isAdmin
-                  ? 'bg-emerald-950/80 border-emerald-700 text-emerald-300 hover:bg-emerald-900'
+                  ? 'bg-red-950/80 border-red-700 text-red-200 hover:bg-red-900'
                   : 'bg-zinc-900 border-zinc-700/80 text-zinc-300 hover:text-white hover:bg-zinc-800'
               }`}
             >
               {isAdmin ? (
                 <>
-                  <Unlock size={14} className="text-emerald-400" />
-                  <span className="hidden sm:inline">Admin Liberado</span>
-                  <span className="sm:hidden">Admin</span>
+                  <ShieldCheck size={14} className="text-red-400" />
+                  <span className="hidden sm:inline">Admin Full</span>
+                  <span className="sm:hidden">Full</span>
                 </>
               ) : (
                 <>
                   <Lock size={14} className="text-amber-400" />
-                  <span className="hidden sm:inline">Acesso Admin (PIN)</span>
+                  <span className="hidden sm:inline">Acesso Admin</span>
                   <span className="sm:hidden">PIN</span>
                 </>
               )}

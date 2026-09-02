@@ -1,0 +1,79 @@
+{
+  "entities": [
+    {
+      "name": "Member",
+      "description": "Quadro de integrantes do sistema Gestão Operacional Sidnei",
+      "collection": "members",
+      "fields": [
+        { "name": "id", "type": "string", "description": "Identificador único do integrante" },
+        { "name": "name", "type": "string", "description": "Nome civil completo" },
+        { "name": "vulgo", "type": "string", "description": "Nome de colete / apelido operacional" },
+        { "name": "grupamento", "type": "string", "description": "Grupamento ou patente operacional" },
+        { "name": "divisaoId", "type": "string", "description": "ID da divisão vinculada" },
+        { "name": "divisaoName", "type": "string", "description": "Nome da divisão vinculada" },
+        { "name": "status", "type": "string", "description": "Status operacional: Ativo, Afastado, etc." },
+        { "name": "phone", "type": "string", "description": "Telefone / WhatsApp para contato" },
+        { "name": "email", "type": "string", "description": "E-mail do integrante" },
+        { "name": "entryDate", "type": "string", "description": "Data de entrada no sistema" },
+        { "name": "grupamentoGraduationDate", "type": "string", "description": "Data de graduação no grupamento" },
+        { "name": "observations", "type": "string", "description": "Observações operacionais e histórico" },
+        { "name": "photoUrl", "type": "string", "description": "URL da foto do integrante" },
+        { "name": "bloodType", "type": "string", "description": "Tipo sanguíneo" },
+        { "name": "emergencyContact", "type": "string", "description": "Contato de emergência" },
+        { "name": "emergencyPhone", "type": "string", "description": "Telefone de emergência" },
+        { "name": "motorcycleModel", "type": "string", "description": "Modelo da motocicleta" },
+        { "name": "motorcyclePlate", "type": "string", "description": "Placa da motocicleta" },
+        { "name": "createdAt", "type": "string", "description": "Timestamp de criação" },
+        { "name": "updatedAt", "type": "string", "description": "Timestamp da última atualização" }
+      ]
+    },
+    {
+      "name": "Divisao",
+      "description": "Divisões territoriais e regionais",
+      "collection": "divisoes",
+      "fields": [
+        { "name": "id", "type": "string", "description": "Identificador único da divisão" },
+        { "name": "name", "type": "string", "description": "Nome da divisão" },
+        { "name": "city", "type": "string", "description": "Cidade polo da divisão" },
+        { "name": "state", "type": "string", "description": "Sigla do estado (UF)" },
+        { "name": "regionalDirector", "type": "string", "description": "Diretor Regional responsável" },
+        { "name": "subDirector", "type": "string", "description": "Subdiretor responsável" },
+        { "name": "createdDate", "type": "string", "description": "Data de fundação da divisão" },
+        { "name": "active", "type": "boolean", "description": "Se a divisão está ativa" },
+        { "name": "meetingSchedule", "type": "string", "description": "Dia e horário das reuniões" },
+        { "name": "meetingLocation", "type": "string", "description": "Local de encontro ou sede" },
+        { "name": "description", "type": "string", "description": "Descrição operacional da divisão" }
+      ]
+    },
+    {
+      "name": "ActivityLog",
+      "description": "Registros de auditoria e ações no sistema",
+      "collection": "logs",
+      "fields": [
+        { "name": "id", "type": "string", "description": "Identificador do registro de log" },
+        { "name": "timestamp", "type": "string", "description": "Data e hora ISO da ação" },
+        { "name": "adminName", "type": "string", "description": "Identificação de quem executou" },
+        { "name": "action", "type": "string", "description": "Tipo de ação (CADASTRO, EDICAO, EXCLUSAO, etc.)" },
+        { "name": "target", "type": "string", "description": "Alvo da operação" },
+        { "name": "details", "type": "string", "description": "Detalhamento da ação realizada" }
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Usuários administradores com privilégios de gestão total no Firestore",
+      "collection": "admins",
+      "fields": [
+        { "name": "id", "type": "string", "description": "Identificador do administrador" },
+        { "name": "email", "type": "string", "description": "E-mail do administrador" },
+        { "name": "name", "type": "string", "description": "Nome / Patente do administrador" },
+        { "name": "role", "type": "string", "description": "Nível de acesso (SUPER_ADMIN / FULL_ADMIN)" },
+        { "name": "status", "type": "string", "description": "Status da conta" },
+        { "name": "permissions", "type": "array", "description": "Permissões operacionais completas" },
+        { "name": "grantedAt", "type": "string", "description": "Data de concessão do acesso" }
+      ]
+    }
+  ],
+  "securityRules": {
+    "description": "Regras de leitura e gravação para Gestão Operacional Sidnei integrando Firestore na nuvem."
+  }
+}

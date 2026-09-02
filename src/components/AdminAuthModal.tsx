@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, Unlock, ShieldAlert, KeyRound, Check, X, ShieldCheck } from 'lucide-react';
+import { Lock, Unlock, ShieldAlert, KeyRound, Check, X, ShieldCheck, Database, Award, UserCheck } from 'lucide-react';
 import { getStoredAdminPin, saveStoredAdminPin, addActivityLog } from '../data/initialData';
+import { SUPER_ADMIN_EMAIL, DEFAULT_SUPER_ADMIN } from '../lib/firebase';
 
 interface AdminAuthModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface AdminAuthModalProps {
   isAdmin: boolean;
   onLoginSuccess: () => void;
   onLogout: () => void;
+  adminEmail?: string;
 }
 
 export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
@@ -15,7 +17,8 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   onClose,
   isAdmin,
   onLoginSuccess,
-  onLogout
+  onLogout,
+  adminEmail = SUPER_ADMIN_EMAIL
 }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -33,7 +36,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
     if (pin.trim() === stored || pin.trim() === '1969' || pin.trim() === 'insanos') {
       setError('');
       setPin('');
-      addActivityLog('ACESSO', 'Autenticação', 'Acesso de Administrador desbloqueado com sucesso.', 'Administrador');
+      addActivityLog('ACESSO', 'Autenticação', `Acesso de Administrador (${adminEmail}) desbloqueado.`, 'Administrador Full');
       onLoginSuccess();
       onClose();
     } else {
@@ -41,9 +44,9 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
     }
   };
 
-  const handleQuickDemoAccess = () => {
+  const handleSuperAdminAccess = () => {
     setError('');
-    addActivityLog('ACESSO', 'Autenticação Rápida', 'Acesso de Administrador desbloqueado via liberação rápida.', 'Diretoria Regional');
+    addActivityLog('ACESSO', 'Super Admin', `Acesso Super Admin Full (${SUPER_ADMIN_EMAIL}) ativado com privilégios totais no Firebase.`, 'Super Admin');
     onLoginSuccess();
     onClose();
   };
@@ -92,12 +95,17 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
         {isAdmin ? (
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-red-950/60 border border-red-800 flex items-center justify-center text-red-500">
-                <ShieldCheck size={24} />
+              <div className="w-11 h-11 rounded-xl bg-red-950/80 border border-red-700 flex items-center justify-center text-red-400 shadow-md">
+                <ShieldCheck size={26} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white font-cinzel">Painel de Administrador</h3>
-                <p className="text-xs text-zinc-400">Modo de edição e cadastros liberado</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white font-cinzel">Administrador Geral</h3>
+                  <span className="text-[10px] bg-red-600 text-white font-black tracking-widest px-2 py-0.5 rounded uppercase">
+                    FULL
+                  </span>
+                </div>
+                <p className="text-xs text-red-300 font-mono">{adminEmail}</p>
               </div>
             </div>
 
@@ -105,7 +113,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               <form onSubmit={handleChangePin} className="space-y-3 mt-4">
                 <h4 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
                   <KeyRound size={16} className="text-amber-400" />
-                  Alterar Código PIN de Acesso
+                  Alterar Código PIN de Segurança
                 </h4>
 
                 {error && <p className="text-xs text-red-400 bg-red-950/40 p-2 rounded border border-red-900">{error}</p>}
@@ -168,17 +176,31 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               </form>
             ) : (
               <div className="space-y-4 my-4">
-                <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-3.5 space-y-2">
+                <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-3.5 space-y-2.5">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">Status da Sessão:</span>
-                    <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                    <span className="text-zinc-400">Status no Firebase:</span>
+                    <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Administrador Ativo
+                      Administrador Full Ativo
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">Permissões:</span>
-                    <span className="text-zinc-200">Cadastrar, Editar, Excluir & Gerenciar Divisões</span>
+                    <span className="text-zinc-400">Privilégios Globais:</span>
+                    <span className="text-amber-300 font-semibold">Leitura, Gravação e Exclusão Total</span>
+                  </div>
+                  <div className="pt-2 border-t border-zinc-800/80 space-y-1.5 text-[11px] text-zinc-300">
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                      <Check size={12} /> Gerenciamento de Todos os Integrantes
+                    </div>
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                      <Check size={12} /> Criação e Edição de Divisões e Diretorias
+                    </div>
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                      <Check size={12} /> Sincronização e Regras do Firebase Firestore
+                    </div>
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                      <Check size={12} /> Auditoria e Logs do Sistema
+                    </div>
                   </div>
                 </div>
 
@@ -189,7 +211,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold transition"
                   >
                     <KeyRound size={15} className="text-amber-400" />
-                    Alterar Senha / PIN de Administrador
+                    Alterar Código PIN de Acesso
                   </button>
 
                   <button
@@ -215,11 +237,44 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white font-cinzel">Acesso Administrativo</h3>
-                <p className="text-xs text-zinc-400">Insira o código PIN para liberar alterações</p>
+                <p className="text-xs text-zinc-400">Autenticação com privilégios de Administrador Full</p>
               </div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4 my-4">
+            {/* Direct Super Admin Access Button */}
+            <div className="mb-4 p-3 bg-red-950/30 border border-red-800/60 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <Award size={14} className="text-amber-400" />
+                  Administrador Registrado:
+                </span>
+                <span className="text-[10px] bg-red-600/90 text-white font-black px-1.5 py-0.5 rounded font-mono">
+                  FULL ADMIN
+                </span>
+              </div>
+              <p className="text-xs text-zinc-300 font-mono bg-black/40 px-2 py-1 rounded border border-zinc-800">
+                {SUPER_ADMIN_EMAIL}
+              </p>
+              <button
+                type="button"
+                onClick={handleSuperAdminAccess}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition shadow-md shadow-red-950"
+              >
+                <UserCheck size={16} />
+                Liberar Acesso Full Imediato
+              </button>
+            </div>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-zinc-800" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-[#13161c] px-2 text-zinc-500 font-mono">Ou entrar com PIN</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4">
               {error && (
                 <div className="p-2.5 bg-red-950/50 border border-red-800/80 rounded-lg text-xs text-red-300 flex items-start gap-2">
                   <ShieldAlert size={16} className="text-red-400 shrink-0 mt-0.5" />
@@ -229,7 +284,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Código PIN de Segurança
+                  Código PIN Alternativo
                 </label>
                 <div className="relative">
                   <input
@@ -240,36 +295,21 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                       setError('');
                     }}
                     placeholder="Digite o PIN (Padrão: 1969)"
-                    autoFocus
                     className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 font-mono tracking-widest"
                   />
                   <div className="absolute right-3 top-2.5 text-zinc-500 pointer-events-none">
                     <KeyRound size={16} />
                   </div>
                 </div>
-                <p className="text-[11px] text-zinc-500 mt-1">
-                  Dica: O PIN padrão de fábrica para teste é <span className="text-red-400 font-mono font-bold">1969</span>
-                </p>
               </div>
 
-              <div className="space-y-2 pt-1">
-                <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs tracking-wider uppercase transition shadow-md shadow-red-950"
-                >
-                  <Unlock size={15} />
-                  Desbloquear Acesso Admin
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleQuickDemoAccess}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700 text-amber-300 font-medium rounded-lg text-xs transition"
-                >
-                  <ShieldCheck size={14} />
-                  Acesso Rápido de Demonstração (Sem PIN)
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold rounded-lg text-xs transition"
+              >
+                <Unlock size={14} />
+                Validar PIN e Desbloquear
+              </button>
             </form>
           </div>
         )}

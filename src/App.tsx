@@ -4,7 +4,21 @@ import {
   getStoredDivisoes, saveStoredDivisoes, 
   getStoredLogs, addActivityLog 
 } from './data/initialData';
-import { Member, Divisao, ActivityLog } from './types';
+import { 
+  subscribeToMembers, 
+  subscribeToDivisoes, 
+  subscribeToLogs, 
+  saveMemberToFirestore, 
+  deleteMemberFromFirestore, 
+  saveDivisaoToFirestore, 
+  deleteDivisaoFromFirestore, 
+  addLogToFirestore, 
+  importAllToFirestore,
+  initSuperAdminInFirestore,
+  subscribeToAdmins,
+  SUPER_ADMIN_EMAIL
+} from './lib/firebase';
+import { Member, Divisao, ActivityLog, AdminUser } from './types';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { MemberList } from './components/MemberList';
 import { DivisionManager } from './components/DivisionManager';
@@ -16,22 +30,24 @@ import { MemberDetailModal } from './components/MemberDetailModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { CrudTestModal } from './components/CrudTestModal';
 import { PrintPreviewModal } from './components/PrintPreviewModal';
-import { CheckCircle, AlertTriangle, ShieldCheck, Skull } from 'lucide-react';
+import { GeminiIntelligenceView } from './components/GeminiIntelligenceView';
+import { printGeminiDocument } from './utils/printService';
+import { CheckCircle, AlertTriangle, ShieldCheck, Skull, Cloud } from 'lucide-react';
 
 export default function App() {
   // Main Data States
   const [members, setMembers] = useState<Member[]>([]);
   const [divisoes, setDivisoes] = useState<Divisao[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [isFirestoreConnected, setIsFirestoreConnected] = useState<boolean>(true);
 
   // Navigation & View States
   const [activeTab, setActiveTab] = useState<ActiveTab>('integrantes');
   const [divisionFilter, setDivisionFilter] = useState<string>('all');
 
-  // Admin Access Control
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    return localStorage.getItem('insanos_mc_is_admin') === 'true';
-  });
+  // Admin Access Control - Full Administrator (imc.sidnei@gmail.com)
+  const [isAdmin, setIsAdmin] = useState<boolean>(true);
+  const [adminEmail, setAdminEmail] = useState<string>(SUPER_ADMIN_EMAIL);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isCrudTestModalOpen, setIsCrudTestModalOpen] = useState<boolean>(false);
 
@@ -50,8 +66,9 @@ export default function App() {
     }, 3500);
   };
 
-  // Initial Load
+  // Initial Load & Firestore Real-time Subscriptions
   useEffect(() => {
+    // Initial local cache load for instant render
     const loadedDivisoes = getStoredDivisoes();
     const loadedMembers = getStoredMembers();
     const loadedLogs = getStoredLogs();
@@ -59,9 +76,55 @@ export default function App() {
     setDivisoes(loadedDivisoes);
     setMembers(loadedMembers);
     setLogs(loadedLogs);
+
+    // Subscribe to Firestore in Real Time
+    const unsubMembers = subscribeToMembers(
+      (cloudMembers) => {
+        setMembers(cloudMembers);
+        setIsFirestoreConnected(true);
+      },
+      (err) => {
+        console.warn('Firestore members sync warning:', err);
+      }
+    );
+
+    const unsubDivisoes = subscribeToDivisoes(
+      (cloudDivisoes) => {
+        setDivisoes(cloudDivisoes);
+      },
+      (err) => {
+        console.warn('Firestore divisoes sync warning:', err);
+      }
+    );
+
+    const unsubLogs = subscribeToLogs(
+      (cloudLogs) => {
+        setLogs(cloudLogs);
+      },
+      (err) => {
+        console.warn('Firestore logs sync warning:', err);
+      }
+    );
+
+    // Provision & verify Super Admin in Firestore
+    initSuperAdminInFirestore().catch((err) => console.error('Super Admin init error:', err));
+
+    const unsubAdmins = subscribeToAdmins((admins) => {
+      const superAdmin = admins.find((a) => a.email === SUPER_ADMIN_EMAIL);
+      if (superAdmin) {
+        setAdminEmail(superAdmin.email);
+      }
+    });
+
+    return () => {
+      unsubMembers();
+      unsubDivisoes();
+      unsubLogs();
+      unsubAdmins();
+    };
   }, []);
 
-  // Save changes
+  // Save changes locally as cache
   const handleSaveMembers = (updatedMembers: Member[]) => {
     setMembers(updatedMembers);
     saveStoredMembers(updatedMembers);
@@ -72,52 +135,73 @@ export default function App() {
     saveStoredDivisoes(updatedDivisoes);
   };
 
-  // Member CRUD Actions
-  const handleAddOrUpdateMember = (member: Member) => {
+  // Member CRUD Actions (Synced to Firestore Cloud)
+  const handleAddOrUpdateMember = async (member: Member) => {
     const isEditing = members.some(m => m.id === member.id);
     let updatedList: Member[];
 
     if (isEditing) {
       updatedList = members.map(m => m.id === member.id ? member : m);
-      const newLogs = addActivityLog('EDICAO', member.vulgo, `Atualização do cadastro e grupamento (${member.grupamento}) de ${member.vulgo}.`);
-      setLogs(newLogs);
       showToast(`Integrante ${member.vulgo} atualizado com sucesso!`);
     } else {
       updatedList = [member, ...members];
-      const newLogs = addActivityLog('CADASTRO', member.vulgo, `Novo integrante cadastrado: ${member.vulgo} (${member.grupamento}) na Divisão ${member.divisaoName}.`);
-      setLogs(newLogs);
       showToast(`Integrante ${member.vulgo} cadastrado na Gestão Operacional Sidnei!`);
     }
 
+    // Optimistic local update
     handleSaveMembers(updatedList);
+
+    // Cloud Firestore persistence
+    try {
+      await saveMemberToFirestore(member);
+      await addLogToFirestore(
+        isEditing ? 'EDICAO' : 'CADASTRO',
+        member.vulgo,
+        isEditing 
+          ? `Atualização do cadastro e grupamento (${member.grupamento}) de ${member.vulgo}.`
+          : `Novo integrante cadastrado: ${member.vulgo} (${member.grupamento}) na Divisão ${member.divisaoName}.`,
+        adminEmail
+      );
+    } catch (err) {
+      console.error('Error saving member to Firestore:', err);
+    }
   };
 
-  const handleDeleteMember = (memberId: string) => {
+  const handleDeleteMember = async (memberId: string) => {
     const memberToDelete = members.find(m => m.id === memberId);
     const updatedList = members.filter(m => m.id !== memberId);
     handleSaveMembers(updatedList);
 
-    if (memberToDelete) {
-      const newLogs = addActivityLog('EXCLUSAO', memberToDelete.vulgo, `Exclusão do cadastro de ${memberToDelete.vulgo} do sistema.`);
-      setLogs(newLogs);
-      showToast(`Integrante ${memberToDelete.vulgo} removido.`);
-    }
-
     if (selectedMemberDetail?.id === memberId) {
       setSelectedMemberDetail(null);
     }
+
+    if (memberToDelete) {
+      showToast(`Integrante ${memberToDelete.vulgo} removido.`);
+      try {
+        await deleteMemberFromFirestore(memberId);
+        await addLogToFirestore('EXCLUSAO', memberToDelete.vulgo, `Exclusão do cadastro de ${memberToDelete.vulgo} do sistema.`, adminEmail);
+      } catch (err) {
+        console.error('Error deleting member from Firestore:', err);
+      }
+    }
   };
 
-  // Division CRUD Actions
-  const handleAddDivisao = (newDiv: Divisao) => {
+  // Division CRUD Actions (Synced to Firestore Cloud)
+  const handleAddDivisao = async (newDiv: Divisao) => {
     const updated = [...divisoes, newDiv];
     handleSaveDivisoes(updated);
-    const newLogs = addActivityLog('DIVISAO', newDiv.name, `Nova divisão ${newDiv.name} criada.`);
-    setLogs(newLogs);
     showToast(`Divisão ${newDiv.name} cadastrada com sucesso!`);
+
+    try {
+      await saveDivisaoToFirestore(newDiv);
+      await addLogToFirestore('DIVISAO', newDiv.name, `Nova divisão ${newDiv.name} criada.`, adminEmail);
+    } catch (err) {
+      console.error('Error adding division to Firestore:', err);
+    }
   };
 
-  const handleUpdateDivisao = (updatedDiv: Divisao) => {
+  const handleUpdateDivisao = async (updatedDiv: Divisao) => {
     const updated = divisoes.map(d => d.id === updatedDiv.id ? updatedDiv : d);
     handleSaveDivisoes(updated);
     
@@ -129,13 +213,17 @@ export default function App() {
       return m;
     });
     handleSaveMembers(updatedMembers);
-
-    const newLogs = addActivityLog('DIVISAO', updatedDiv.name, `Divisão ${updatedDiv.name} atualizada.`);
-    setLogs(newLogs);
     showToast(`Divisão ${updatedDiv.name} atualizada!`);
+
+    try {
+      await saveDivisaoToFirestore(updatedDiv);
+      await addLogToFirestore('DIVISAO', updatedDiv.name, `Divisão ${updatedDiv.name} atualizada.`, adminEmail);
+    } catch (err) {
+      console.error('Error updating division in Firestore:', err);
+    }
   };
 
-  const handleDeleteDivisao = (divisaoId: string) => {
+  const handleDeleteDivisao = async (divisaoId: string) => {
     const div = divisoes.find(d => d.id === divisaoId);
     if (!div) return;
 
@@ -148,26 +236,29 @@ export default function App() {
 
     const updated = divisoes.filter(d => d.id !== divisaoId);
     handleSaveDivisoes(updated);
-    const newLogs = addActivityLog('EXCLUSAO', div.name, `Divisão "${div.name}" removida do sistema.`);
-    setLogs(newLogs);
     showToast(`Divisão ${div.name} removida.`);
+
+    try {
+      await deleteDivisaoFromFirestore(divisaoId);
+      await addLogToFirestore('EXCLUSAO', div.name, `Divisão "${div.name}" removida do sistema.`, adminEmail);
+    } catch (err) {
+      console.error('Error deleting division from Firestore:', err);
+    }
   };
 
   // Admin Auth Handlers
   const handleAdminLoginSuccess = () => {
     setIsAdmin(true);
     localStorage.setItem('insanos_mc_is_admin', 'true');
-    const newLogs = addActivityLog('ACESSO', 'Painel Admin', 'Sessão de Administrador iniciada com sucesso.');
-    setLogs(newLogs);
-    showToast('Acesso de Administrador Ativado!', 'success');
+    addLogToFirestore('ACESSO', 'Painel Admin', `Sessão Full Administrator (${adminEmail}) ativada no Firebase.`, adminEmail);
+    showToast(`Administrador Full Ativado (${adminEmail})!`, 'success');
   };
 
   const handleAdminLogout = () => {
     setIsAdmin(false);
     localStorage.setItem('insanos_mc_is_admin', 'false');
-    const newLogs = addActivityLog('ACESSO', 'Painel Admin', 'Sessão de Administrador encerrada.');
-    setLogs(newLogs);
-    showToast('Modo Administrador bloqueado.', 'info');
+    addLogToFirestore('ACESSO', 'Painel Admin', `Sessão de Administrador (${adminEmail}) pausada.`, adminEmail);
+    showToast('Modo Administrador pausado.', 'info');
   };
 
   // Division Filter Navigation from Division Card
@@ -176,13 +267,19 @@ export default function App() {
     setActiveTab('integrantes');
   };
 
-  // Backup restore
-  const handleImportBackup = (importedMembers: Member[], importedDivisoes: Divisao[]) => {
+  // Backup restore (Synced to Firestore)
+  const handleImportBackup = async (importedMembers: Member[], importedDivisoes: Divisao[]) => {
     handleSaveMembers(importedMembers);
     handleSaveDivisoes(importedDivisoes);
-    const newLogs = addActivityLog('ACESSO', 'Backup Restauração', `Banco restaurado com ${importedMembers.length} integrantes e ${importedDivisoes.length} divisões.`);
-    setLogs(newLogs);
-    showToast('Backup e estrutura importados com sucesso!');
+    showToast('Backup importado! Sincronizando com Firestore...');
+
+    try {
+      await importAllToFirestore(importedMembers, importedDivisoes);
+      await addLogToFirestore('ACESSO', 'Backup Restauração', `Banco restaurado com ${importedMembers.length} integrantes e ${importedDivisoes.length} divisões.`);
+      showToast('Sincronização com Firebase Firestore concluída!');
+    } catch (err) {
+      console.error('Error syncing imported backup to Firestore:', err);
+    }
   };
 
   const caveirasCount = members.filter(m => m.grupamento.includes('Caveira')).length;
@@ -208,10 +305,12 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isAdmin={isAdmin}
+        adminEmail={adminEmail}
         onOpenAdminAuth={() => setIsAdminModalOpen(true)}
         membersCount={members.length}
         divisoesCount={divisoes.length}
         caveirasCount={caveirasCount}
+        isFirestoreConnected={isFirestoreConnected}
         onOpenAddMember={() => {
           setMemberToEdit(null);
           setIsMemberModalOpen(true);
@@ -270,6 +369,17 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'gemini_ia' && (
+          <GeminiIntelligenceView
+            members={members}
+            divisoes={divisoes}
+            adminEmail={adminEmail}
+            onOpenPrintPreview={(title, content) => {
+              printGeminiDocument(title, content);
+            }}
+          />
+        )}
+
         {activeTab === 'auditoria' && (
           <AuditLogsView
             logs={logs}
@@ -310,6 +420,7 @@ export default function App() {
         isOpen={isAdminModalOpen}
         onClose={() => setIsAdminModalOpen(false)}
         isAdmin={isAdmin}
+        adminEmail={adminEmail}
         onLoginSuccess={handleAdminLoginSuccess}
         onLogout={handleAdminLogout}
       />

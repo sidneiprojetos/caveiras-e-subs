@@ -24,8 +24,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
       const q = search.toLowerCase();
       const matchName = m.name.toLowerCase().includes(q);
       const matchVulgo = m.vulgo.toLowerCase().includes(q);
-      const matchColete = m.coleteNumber.toLowerCase().includes(q);
-      if (!matchName && !matchVulgo && !matchColete) return false;
+      if (!matchName && !matchVulgo) return false;
     }
     return true;
   });
@@ -67,7 +66,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por Vulgo, Nome ou Colete..."
+            placeholder="Buscar por Nome de Colete, Nome..."
             className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg pl-9 pr-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
           />
           <Search size={14} className="absolute left-3 top-2.5 text-zinc-500" />
@@ -128,8 +127,8 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
                 </div>
               </div>
 
-              <span className="font-mono text-xs font-bold text-amber-400 bg-black/60 px-2 py-0.5 rounded border border-zinc-800">
-                {member.coleteNumber}
+              <span className="text-[11px] font-bold text-amber-400 bg-black/60 px-2 py-0.5 rounded border border-zinc-800 truncate max-w-[140px]">
+                {member.divisaoName}
               </span>
             </div>
 
