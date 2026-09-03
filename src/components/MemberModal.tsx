@@ -204,7 +204,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold text-white font-cinzel tracking-wide">
-                {memberToEdit ? 'Editar Integrante • Gestão Operacional Sidnei' : 'Cadastrar Novo Integrante'}
+                {memberToEdit ? 'Editar Integrante • Op. Sid' : 'Cadastrar Novo Integrante'}
               </h2>
               <p className="text-xs text-zinc-400">
                 {memberToEdit ? `Atualização de cadastro de ${memberToEdit.vulgo}` : 'Registro no quadro de grupamentos e divisões'}

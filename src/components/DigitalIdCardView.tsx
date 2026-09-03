@@ -54,7 +54,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             Carteirinhas & Credenciais Digitais
           </h2>
           <p className="text-xs text-zinc-400 mt-1 max-w-xl">
-            Credenciais oficiais para porte em viagens, comboios e validação de grupamento e divisão - Gestão Operacional Sidnei.
+            Credenciais oficiais para porte em viagens, comboios e validação de grupamento e divisão - Op. Sid.
           </p>
         </div>
 
@@ -138,7 +138,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
                 </div>
                 <div>
                   <h4 className="text-xs font-black text-white font-cinzel tracking-wider">
-                    Gestão Operacional Sidnei
+                    Op. Sid
                   </h4>
                   <p className="text-[9px] text-zinc-400 uppercase tracking-widest">
                     Credencial Oficial

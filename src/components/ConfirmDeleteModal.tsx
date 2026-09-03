@@ -50,7 +50,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
                 {isBlocked ? 'Ação Bloqueada' : 'Confirmar Exclusão'}
               </h3>
               <p className="text-xs text-zinc-400">
-                {target.type === 'member' ? 'Exclusão de Integrante • Gestão Operacional Sidnei' : 'Exclusão de Divisão Regional'}
+                {target.type === 'member' ? 'Exclusão de Integrante • Op. Sid' : 'Exclusão de Divisão Regional'}
               </p>
             </div>
           </div>

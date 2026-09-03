@@ -203,7 +203,7 @@ export default function App() {
       showToast(`Integrante ${member.vulgo} atualizado com sucesso!`);
     } else {
       updatedList = [member, ...members];
-      showToast(`Integrante ${member.vulgo} cadastrado na Gestão Operacional Sidnei!`);
+      showToast(`Integrante ${member.vulgo} cadastrado na Op. Sid!`);
     }
 
     // Optimistic local update
@@ -522,7 +522,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Skull size={16} className="text-red-600" />
-            <span className="font-cinzel font-bold text-zinc-400">Gestão Operacional Sidnei</span>
+            <span className="font-cinzel font-bold text-zinc-400">Op. Sid</span>
           </div>
           <p className="text-[11px]">
             Divisões: Umuarama Oeste, Umuarama Leste, Cianorte, Cidade Gaúcha, Campo Mourão e Goioerê

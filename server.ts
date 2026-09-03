@@ -97,7 +97,7 @@ app.post("/api/gemini/analyze", async (req, res) => {
     const ai = getGeminiClient();
 
     const prompt = `
-Você é o Assistente Estratégico e Oficial de Inteligência da "Gestão Operacional Sidnei" (Insanos MC).
+ Você é o Assistente Estratégico e Oficial de Inteligência da "Op. Sid" (Insanos MC).
 O Administrador Geral e Super Admin é Sidnei (imc.sidnei@gmail.com).
 
 Dados do Sistema:
@@ -158,7 +158,7 @@ app.post("/api/gemini/comunicado", async (req, res) => {
     const ai = getGeminiClient();
 
     const prompt = `
-Você é o redator oficial de ordens e comunicados da "Gestão Operacional Sidnei".
+ Você é o redator oficial de ordens e comunicados da "Op. Sid".
 Assinatura Oficial:
 "Sidnei - Administrador Geral & Gestão Operacional"
 E-mail Institucional: imc.sidnei@gmail.com
@@ -172,7 +172,7 @@ Crie um documento oficial e formatado com rigor de conduta, respeito e hierarqui
 - Observações Especiais: ${observacoes || "Cumprimento obrigatório dos regulamentos e fraternidade"}
 
 Estrutura desejada:
-1. Cabeçalho Oficial (GESTÃO OPERACIONAL SIDNEI - COMUNICADO OFICIAL Nº ${Math.floor(100 + Math.random() * 900)}/2026)
+1. Cabeçalho Oficial (OP. SID - COMUNICADO OFICIAL Nº ${Math.floor(100 + Math.random() * 900)}/2026)
 2. Destinatários e Referência
 3. Texto da Ordem / Diretriz (parágrafos claros, objetivos e de alta autoridade)
 4. Recomendações de Segurança & Fraternidade
@@ -205,7 +205,7 @@ app.post("/api/gemini/chat", async (req, res) => {
     const ai = getGeminiClient();
 
     const systemContext = `
-Você é o Assistente Virtual de Inteligência da Gestão Operacional Sidnei, operando através do Default Gemini Project (gen-lang-client-0085694200) com o modelo gemini-3.8-flash.
+ Você é o Assistente Virtual de Inteligência da Op. Sid, operando através do Default Gemini Project (gen-lang-client-0085694200) com o modelo gemini-3.8-flash.
 O usuário administrador é Sidnei (imc.sidnei@gmail.com).
 
 Você possui conhecimento operacional sobre:

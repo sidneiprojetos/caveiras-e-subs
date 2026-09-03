@@ -90,7 +90,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
 
     setIsRunning(true);
     setTestLogs([]);
-    logMessage('Iniciando Teste Automatizado de CRUD - Gestão Operacional Sidnei...');
+    logMessage('Iniciando Teste Automatizado de CRUD - Op. Sid...');
 
     const testId = `test-member-${Date.now()}`;
     const testDivisao = divisoes[0] || { id: 'div-umuarama-oeste', name: 'Umuarama Oeste', city: 'Umuarama', state: 'PR', active: true };

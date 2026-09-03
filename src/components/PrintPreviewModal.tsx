@@ -189,7 +189,7 @@ export const PrintPreviewModal: React.FC = () => {
 
           <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-zinc-400">
             <Info size={13} className="text-zinc-500" />
-            <span>Formato A4 • Gestão Operacional Sidnei</span>
+            <span>Formato A4 • Op. Sid</span>
           </div>
         </div>
 

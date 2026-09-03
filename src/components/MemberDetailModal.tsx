@@ -250,7 +250,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           {/* Digital Card Preview */}
           <div className="bg-gradient-to-r from-zinc-900 via-[#181a20] to-zinc-900 border border-zinc-700/80 rounded-xl p-4 space-y-3 print-card">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-cinzel font-bold text-red-500 tracking-wider">GESTÃO OPERACIONAL SIDNEI</span>
+              <span className="font-cinzel font-bold text-red-500 tracking-wider">OP. SID</span>
               <span className="font-mono text-zinc-400">ID REGISTRO #{member.id.substring(0, 8).toUpperCase()}</span>
             </div>
             <div className="flex items-center justify-between pt-2">

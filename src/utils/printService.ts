@@ -37,7 +37,7 @@ export function buildDocumentHtml(title: string, bodyContent: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} • Gestão Operacional Sidnei</title>
+  <title>${title} • Op. Sid</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Teko:wght@600;700&display=swap" rel="stylesheet">
@@ -331,7 +331,7 @@ export function buildDocumentHtml(title: string, bodyContent: string): string {
   <div class="screen-toolbar no-print">
     <div class="screen-toolbar-title">
       <span style="font-size: 18px;">💀</span>
-      <span>${title} • Gestão Operacional Sidnei</span>
+      <span>${title} • Op. Sid</span>
     </div>
     <div class="screen-actions">
       <button class="btn-print" onclick="window.print()">
@@ -407,7 +407,7 @@ export function printMemberDossier(member: Member): Promise<boolean> {
   const html = `
     <div class="header-bar">
       <div>
-        <h1 class="logo-title">Gestão Operacional Sidnei</h1>
+        <h1 class="logo-title">Op. Sid</h1>
         <div class="sub-title">Dossiê Oficial do Integrante • Divisão ${member.divisaoName}</div>
       </div>
       <div class="meta-badge">
@@ -503,12 +503,12 @@ export function printMemberDossier(member: Member): Promise<boolean> {
       <div class="signature-box">
         <div class="signature-line"></div>
         <div class="signature-name">Diretoria Regional</div>
-        <div class="signature-role">Gestão Operacional Sidnei</div>
+        <div class="signature-role">Op. Sid</div>
       </div>
     </div>
 
     <div class="footer-stamp">
-      Gestão Operacional Sidnei • Dossiê gerado eletronicamente através do Sistema de Gestão de Grupamentos e Divisões • Código de Autenticidade: ${member.id.substring(0, 12).toUpperCase()}
+      Op. Sid • Dossiê gerado eletronicamente através do Sistema de Gestão de Grupamentos e Divisões • Código de Autenticidade: ${member.id.substring(0, 12).toUpperCase()}
     </div>
   `;
 
@@ -551,7 +551,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
   const html = `
     <div class="header-bar">
       <div>
-        <h1 class="logo-title">Gestão Operacional Sidnei</h1>
+        <h1 class="logo-title">Op. Sid</h1>
         <div class="sub-title">Relatório Oficial • ${filterTitle}</div>
       </div>
       <div class="meta-badge">
@@ -583,7 +583,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
       <div class="signature-box" style="width: 220px;">
         <div class="signature-line"></div>
         <div class="signature-name">Secretaria Geral</div>
-        <div class="signature-role">Gestão Operacional Sidnei</div>
+        <div class="signature-role">Op. Sid</div>
       </div>
       <div class="signature-box" style="width: 220px;">
         <div class="signature-line"></div>
@@ -593,7 +593,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
     </div>
 
     <div class="footer-stamp">
-      Relatório de Efetivo impresso via Sistema de Gestão Operacional Sidnei
+      Relatório de Efetivo impresso via Sistema Op. Sid
     </div>
   `;
 
@@ -614,7 +614,7 @@ export function printIdCards(members: Member[]): Promise<boolean> {
     <div class="id-card">
       <div class="id-card-header">
         <div>
-          <div class="id-card-title">Gestão Operacional Sidnei</div>
+          <div class="id-card-title">Op. Sid</div>
           <div style="font-size: 7pt; font-weight: 700; color: #555555; text-transform: uppercase;">Credencial de Integrante</div>
         </div>
         <div style="font-size: 8pt; font-weight: 800; color: #991b1b; border: 1px solid #991b1b; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">
@@ -660,7 +660,7 @@ export function printIdCards(members: Member[]): Promise<boolean> {
   const html = `
     <div class="header-bar" style="margin-bottom: 12px; padding-bottom: 8px;">
       <div>
-        <h1 class="logo-title" style="font-size: 16pt;">Gestão Operacional Sidnei • CARTÕES DE IDENTIFICAÇÃO</h1>
+        <h1 class="logo-title" style="font-size: 16pt;">Op. Sid • CARTÕES DE IDENTIFICAÇÃO</h1>
         <div class="sub-title">Grade para recorte e plastificação • Total: ${members.length} Credenciais</div>
       </div>
       <div class="meta-badge">
@@ -673,7 +673,7 @@ export function printIdCards(members: Member[]): Promise<boolean> {
     </div>
 
     <div class="footer-stamp" style="margin-top: 20px;">
-      Cartões de identificação de porte exclusivo para integrantes credenciados - Gestão Operacional Sidnei.
+      Cartões de identificação de porte exclusivo para integrantes credenciados - Op. Sid.
     </div>
   `;
 
@@ -710,7 +710,7 @@ export function printAuditLogs(logs: ActivityLog[], filterTitle = 'Relatório de
   const html = `
     <div class="header-bar">
       <div>
-        <h1 class="logo-title">Gestão Operacional Sidnei</h1>
+        <h1 class="logo-title">Op. Sid</h1>
         <div class="sub-title">Livro de Auditoria • ${filterTitle}</div>
       </div>
       <div class="meta-badge">
@@ -736,7 +736,7 @@ export function printAuditLogs(logs: ActivityLog[], filterTitle = 'Relatório de
     </table>
 
     <div class="footer-stamp">
-      Relatório gerado a partir do Livro de Atividades e Logs - Gestão Operacional Sidnei • Assinatura Digital do Sistema
+      Relatório gerado a partir do Livro de Atividades e Logs - Op. Sid • Assinatura Digital do Sistema
     </div>
   `;
 
@@ -762,7 +762,7 @@ export function printGeminiDocument(title: string, content: string): Promise<boo
   const body = `
     <div class="header-bar">
       <div>
-        <h1 class="logo-title">Gestão Operacional Sidnei</h1>
+        <h1 class="logo-title">Op. Sid</h1>
         <div class="sub-title">Inteligência Operacional Gemini • ${title}</div>
       </div>
       <div class="meta-badge">

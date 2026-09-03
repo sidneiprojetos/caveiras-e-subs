@@ -1,6 +1,6 @@
 {
-  "name": "Gestão Operacional Sidnei",
-  "description": "Sistema de gestão operacional de grupamentos, divisões e integrantes - Gestão Operacional Sidnei.",
+  "name": "Op. Sid",
+  "description": "Sistema de gestão operacional de grupamentos, divisões e integrantes - Op. Sid.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

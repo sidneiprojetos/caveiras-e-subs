@@ -1,5 +1,5 @@
 /**
- * Date utilities for Gestão Operacional Sidnei.
+ * Date utilities for Op. Sid.
  * Eliminates timezone conversion errors where "2025-10-30" is parsed as UTC midnight
  * and shifted to "29/10/2025" in Brazilian timezones (UTC-3).
  */

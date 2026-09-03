@@ -2,7 +2,7 @@
   "entities": [
     {
       "name": "Member",
-      "description": "Quadro de integrantes do sistema Gestão Operacional Sidnei",
+      "description": "Quadro de integrantes do sistema Op. Sid",
       "collection": "members",
       "fields": [
         { "name": "id", "type": "string", "description": "Identificador único do integrante" },
@@ -106,6 +106,6 @@
     }
   ],
   "securityRules": {
-    "description": "Regras de leitura e gravação para Gestão Operacional Sidnei integrando Firestore na nuvem."
+    "description": "Regras de leitura e gravação para Op. Sid integrando Firestore na nuvem."
   }
 }

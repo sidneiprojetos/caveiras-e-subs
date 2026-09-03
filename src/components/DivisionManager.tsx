@@ -156,7 +156,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
             <span className="text-xs uppercase font-bold tracking-widest text-red-400">Estrutura Territorial</span>
           </div>
           <h2 className="text-2xl font-black text-white font-cinzel tracking-wide">
-            Divisões • Gestão Operacional Sidnei
+            Divisões • Op. Sid
           </h2>
           <p className="text-xs text-zinc-400 mt-1 max-w-xl">
             Gerenciamento das divisões regionais (Umuarama Oeste, Leste, Cianorte, Cidade Gaúcha, Campo Mourão, Goioerê e novas expansões).
@@ -317,7 +317,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
                     {editingDivisao ? 'Editar Divisão' : 'Cadastrar Nova Divisão'}
                   </h3>
                   <p className="text-xs text-zinc-400">
-                    Gestão Operacional Sidnei • Divisões & Expansão
+                    Op. Sid • Divisões & Expansão
                   </p>
                 </div>
               </div>

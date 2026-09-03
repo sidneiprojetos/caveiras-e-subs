@@ -138,7 +138,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
   const handleExportJSON = () => {
     const data = {
-      app: 'Gestão Operacional Sidnei - Sistema de Grupamentos e Divisões',
+      app: 'Op. Sid - Sistema de Grupamentos e Divisões',
       exportedAt: new Date().toISOString(),
       divisoes,
       members
@@ -419,7 +419,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-red-500 font-cinzel font-black text-xl tracking-wider">
-                GESTÃO OPERACIONAL SIDNEI
+                OP. SID
               </span>
             </div>
             <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
@@ -565,7 +565,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <div className="border-t border-black pt-2 font-bold">
                 DIRETORIA REGIONAL / COMANDO
               </div>
-              <p className="text-[10px] text-zinc-600">Gestão Operacional Sidnei</p>
+              <p className="text-[10px] text-zinc-600">Op. Sid</p>
             </div>
             <div>
               <div className="border-t border-black pt-2 font-bold">
