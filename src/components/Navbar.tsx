@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-white font-cinzel tracking-wider leading-none">
-                  Gestão Operacional <span className="text-red-500">Sidnei</span>
+                  <span className="text-red-500">Op. Sid</span>
                 </h1>
                 <span className="hidden sm:inline-block text-[10px] font-mono uppercase bg-red-950/80 text-red-300 px-2 py-0.5 rounded border border-red-800">
                   Operacional
