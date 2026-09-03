@@ -43,7 +43,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   grupamentos,
   onOpenGrupamentoManager
 }) => {
-  type SortField = 'vulgo' | 'name' | 'grupamento' | 'divisaoName' | 'status' | 'entryDate';
+  type SortField = 'coleteNumber' | 'vulgo' | 'name' | 'grupamento' | 'divisaoName' | 'status' | 'entryDate';
   const viewMode: string = 'table';
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
@@ -73,6 +73,12 @@ export const MemberList: React.FC<MemberListProps> = ({
     }
     return true;
   }).sort((a, b) => {
+    if (sortBy === 'coleteNumber') {
+      const numberA = a.coleteNumber ? Number(a.coleteNumber) : Number.POSITIVE_INFINITY;
+      const numberB = b.coleteNumber ? Number(b.coleteNumber) : Number.POSITIVE_INFINITY;
+      if (numberA !== numberB) return sortOrder === 'asc' ? numberA - numberB : numberB - numberA;
+      return a.vulgo.localeCompare(b.vulgo);
+    }
     let fieldA = a[sortBy] || '';
     let fieldB = b[sortBy] || '';
     if (typeof fieldA === 'string') fieldA = fieldA.toLowerCase();
@@ -280,6 +286,7 @@ export const MemberList: React.FC<MemberListProps> = ({
             onChange={(e) => setSortBy(e.target.value as SortField)}
             className="bg-transparent text-zinc-200 font-medium focus:outline-none cursor-pointer"
           >
+            <option value="coleteNumber" className="bg-[#12151c]">Número</option>
             <option value="vulgo" className="bg-[#12151c]">Nome de Colete</option>
             <option value="name" className="bg-[#12151c]">Nome Completo</option>
             <option value="grupamento" className="bg-[#12151c]">Grupamento</option>
@@ -447,6 +454,7 @@ export const MemberList: React.FC<MemberListProps> = ({
               <thead>
                 <tr className="border-b border-zinc-800 bg-[#0e1117] text-zinc-400 uppercase font-semibold">
                   {([
+                    ['coleteNumber', 'Número'],
                     ['vulgo', 'Nome de Colete / Nome'],
                     ['grupamento', 'Grupamento'],
                     ['divisaoName', 'Divisão'],
@@ -490,12 +498,14 @@ export const MemberList: React.FC<MemberListProps> = ({
                         </div>
                         <div>
                           <strong className="text-white block font-semibold group-hover:text-red-400 transition font-cinzel">
-                            {m.coleteNumber && <span className="text-red-400 mr-1">#{m.coleteNumber}</span>}
                             {m.vulgo}
                           </strong>
                           <span className="text-[11px] text-zinc-400 block">{m.name}</span>
                         </div>
                       </div>
+                    </td>
+                    <td className="py-3 px-4 text-red-400 font-bold font-mono">
+                      {m.coleteNumber ? `#${m.coleteNumber}` : '-'}
                     </td>
                     <td className="py-3 px-4">
                       <GrupamentoBadge 

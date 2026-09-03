@@ -464,6 +464,10 @@ export function printMemberDossier(member: Member): Promise<boolean> {
         <span class="info-value" style="font-weight: 800; color: #991b1b;">${member.coleteNumber ? `#${member.coleteNumber} ` : ''}${member.vulgo}</span>
       </div>
       <div class="info-item">
+        <span class="info-label">Número</span>
+        <span class="info-value">${member.coleteNumber ? `#${member.coleteNumber}` : 'Não informado'}</span>
+      </div>
+      <div class="info-item">
         <span class="info-label">Nome Civil Completo</span>
         <span class="info-value">${member.name}</span>
       </div>
@@ -527,6 +531,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
     <tr>
       <td style="text-align: center; font-weight: bold; width: 30px;">${idx + 1}</td>
       <td style="font-weight: 800; font-family: 'Cinzel', serif; color: #991b1b;">${m.vulgo}</td>
+      <td style="font-weight: 800; color: #991b1b;">${m.coleteNumber ? `#${m.coleteNumber}` : '-'}</td>
       <td>${m.name}</td>
       <td style="font-weight: 600;">${m.grupamento}</td>
       <td>${m.divisaoName}</td>
@@ -553,6 +558,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
         <tr>
           <th style="text-align: center; width: 25px;">#</th>
           <th>Nome de Colete</th>
+          <th>Número</th>
           <th>Nome Completo</th>
           <th>Grupamento</th>
           <th>Divisão</th>
@@ -614,7 +620,7 @@ export function printIdCards(members: Member[]): Promise<boolean> {
         </div>
         <div>
           <div style="font-size: 12pt; font-weight: 900; font-family: 'Cinzel', serif; color: #111111; line-height: 1.1;">
-            ${m.vulgo}
+            ${m.coleteNumber ? `#${m.coleteNumber} ` : ''}${m.vulgo}
           </div>
           <div style="font-size: 8pt; color: #444444; font-weight: 600;">
             ${m.name}

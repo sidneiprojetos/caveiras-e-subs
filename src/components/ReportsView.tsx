@@ -104,6 +104,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   const handleExportCSV = () => {
     const headers = [
       'Nome de Colete',
+      'Número',
       'Nome Completo',
       'Grupamento',
       'Divisão',
@@ -113,6 +114,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
     const rows = filteredRoster.map(m => [
       `"${m.vulgo}"`,
+      `"${m.coleteNumber || ''}"`,
       `"${m.name}"`,
       `"${m.grupamento}"`,
       `"${m.divisaoName}"`,
