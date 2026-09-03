@@ -454,7 +454,19 @@ export const subscribeToGrupamentos = (
       } catch (seedErr) {
         console.error('Error seeding initial grupamentos to Firestore:', seedErr);
       }
-      callback(initialData);
+      let synchronizedData = initialData;
+      try {
+        const latestLocal = localStorage.getItem('insanos_mc_grupamentos_v1');
+        if (latestLocal) {
+          const parsed = JSON.parse(latestLocal);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            synchronizedData = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not read latest localStorage after grupamentos seed', e);
+      }
+      callback(synchronizedData);
     } else {
       const items: GrupamentoConfig[] = [];
       snapshot.forEach((d) => {
@@ -482,7 +494,10 @@ export const subscribeToGrupamentos = (
  */
 export const saveGrupamentoToFirestore = async (grupamento: GrupamentoConfig): Promise<void> => {
   const docRef = doc(db, COLLECTIONS.GRUPAMENTOS, grupamento.id);
-  await setDoc(docRef, grupamento, { merge: true });
+  const grupamentoData = Object.fromEntries(
+    Object.entries(grupamento).filter(([, value]) => value !== undefined)
+  );
+  await setDoc(docRef, grupamentoData, { merge: true });
 };
 
 /**
