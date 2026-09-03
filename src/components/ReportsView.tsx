@@ -39,6 +39,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   const totalMembers = members.length;
   const caveiras = members.filter(m => m.grupamento.toLowerCase() === 'caveira').length;
   const subdiretores = members.filter(m => m.grupamento.toLowerCase().includes('subdiretor')).length;
+  const operacionais = members.filter(m => m.grupamento.toLowerCase() === 'operacional regional').length;
+  const subdiretoresCaveiras = members.filter(m => {
+    const grupamento = m.grupamento.toLowerCase();
+    return grupamento.includes('subdiretor') && grupamento.includes('caveira');
+  }).length;
   const ativos = members.filter(m => m.status === 'Ativo').length;
 
   const THEME_COLORS: Record<string, string> = {
