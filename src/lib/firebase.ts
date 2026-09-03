@@ -232,10 +232,11 @@ export const subscribeToLogs = (
  */
 export const saveMemberToFirestore = async (member: Member): Promise<void> => {
   const docRef = doc(db, COLLECTIONS.MEMBERS, member.id);
-  await setDoc(docRef, {
+  const memberData = Object.fromEntries(Object.entries({
     ...member,
     updatedAt: new Date().toISOString()
-  }, { merge: true });
+  }).filter(([, value]) => value !== undefined));
+  await setDoc(docRef, memberData, { merge: true });
 };
 
 /**
