@@ -485,6 +485,9 @@ export const MemberList: React.FC<MemberListProps> = ({
                     onClick={() => onSelectMember(m)}
                     className="hover:bg-zinc-800/40 transition cursor-pointer group"
                   >
+                    <td className="py-3 px-4 text-red-400 font-bold font-mono">
+                      {m.coleteNumber ? `#${m.coleteNumber}` : '-'}
+                    </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-lg bg-[#181c24] border border-red-600/70 flex items-center justify-center text-red-400 shrink-0">
@@ -503,9 +506,6 @@ export const MemberList: React.FC<MemberListProps> = ({
                           <span className="text-[11px] text-zinc-400 block">{m.name}</span>
                         </div>
                       </div>
-                    </td>
-                    <td className="py-3 px-4 text-red-400 font-bold font-mono">
-                      {m.coleteNumber ? `#${m.coleteNumber}` : '-'}
                     </td>
                     <td className="py-3 px-4">
                       <GrupamentoBadge 
