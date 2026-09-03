@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Member, Divisao } from '../types';
 import { addActivityLog } from '../data/initialData';
+import { getTodayDateString } from '../utils/dateUtils';
 
 interface CrudTestModalProps {
   isOpen: boolean;
@@ -105,8 +106,8 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       status: 'Ativo',
       phone: '(44) 99999-8888',
       email: 'teste.crud@gestao.com.br',
-      entryDate: new Date().toISOString().split('T')[0],
-      grupamentoGraduationDate: new Date().toISOString().split('T')[0],
+      entryDate: getTodayDateString(),
+      grupamentoGraduationDate: getTodayDateString(),
       observations: 'Registro temporário gerado para validação de testes do sistema CRUD.',
       createdAt: nowIso,
       updatedAt: nowIso
@@ -279,7 +280,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       status: 'Ativo',
       phone: '(44) 99123-4567',
       email: 'membro.teste@gestao.com.br',
-      entryDate: new Date().toISOString().split('T')[0],
+      entryDate: getTodayDateString(),
       observations: 'Criado manualmente pelo painel de Teste de CRUD.',
       createdAt: nowIso,
       updatedAt: nowIso

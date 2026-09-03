@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Member, Divisao, MemberStatus, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { getTodayDateString } from '../utils/dateUtils';
 import { 
   X as CloseIcon, 
   User as UserIcon, 
@@ -36,7 +37,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   const [status, setStatus] = useState<MemberStatus>('Ativo');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [entryDate, setEntryDate] = useState(getTodayDateString());
   const [graduationDate, setGraduationDate] = useState('');
   const [observations, setObservations] = useState('');
 
@@ -60,7 +61,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       setStatus(memberToEdit.status || 'Ativo');
       setPhone(memberToEdit.phone || '');
       setEmail(memberToEdit.email || '');
-      setEntryDate(memberToEdit.entryDate || new Date().toISOString().split('T')[0]);
+      setEntryDate(memberToEdit.entryDate || getTodayDateString());
       setGraduationDate(memberToEdit.grupamentoGraduationDate || '');
       setObservations(memberToEdit.observations || '');
     } else {
@@ -73,8 +74,8 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       setStatus('Ativo');
       setPhone('');
       setEmail('');
-      setEntryDate(new Date().toISOString().split('T')[0]);
-      setGraduationDate(new Date().toISOString().split('T')[0]);
+      setEntryDate(getTodayDateString());
+      setGraduationDate('');
       setObservations('');
     }
     setFormError('');
@@ -130,7 +131,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       status,
       phone: phone.trim(),
       email: email.trim(),
-      entryDate: entryDate || new Date().toISOString().split('T')[0],
+      entryDate: entryDate || getTodayDateString(),
       grupamentoGraduationDate: graduationDate || undefined,
       observations: observations.trim(),
       createdAt: memberToEdit ? memberToEdit.createdAt : new Date().toISOString(),

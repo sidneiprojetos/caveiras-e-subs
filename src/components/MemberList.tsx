@@ -7,6 +7,7 @@ import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { ConfirmDeleteModal, DeleteTargetInfo } from './ConfirmDeleteModal';
 import { printRosterReport, printMemberDossier } from '../utils/printService';
+import { formatDateBR } from '../utils/dateUtils';
 
 interface MemberListProps {
   members: Member[];
@@ -364,7 +365,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                       No MC desde:
                     </span>
                     <span className="font-medium text-zinc-300">
-                      {new Date(member.entryDate).toLocaleDateString('pt-BR')}
+                      {formatDateBR(member.entryDate)}
                     </span>
                   </div>
                 </div>
@@ -492,7 +493,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                       </span>
                     </td>
                     <td className="py-3 px-4 text-zinc-300 font-medium">
-                      {new Date(m.entryDate).toLocaleDateString('pt-BR')}
+                      {formatDateBR(m.entryDate)}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>

@@ -1,4 +1,5 @@
 import { Member, Divisao, ActivityLog } from '../types';
+import { formatDateBR } from './dateUtils';
 
 export interface PrintModalData {
   isOpen: boolean;
@@ -451,7 +452,7 @@ export function printMemberDossier(member: Member): Promise<boolean> {
       </div>
       <div class="info-item">
         <span class="info-label">Data de Entrada</span>
-        <span class="info-value">${new Date(member.entryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+        <span class="info-value">${formatDateBR(member.entryDate)}</span>
       </div>
     </div>
 
@@ -479,11 +480,11 @@ export function printMemberDossier(member: Member): Promise<boolean> {
     <div class="info-grid">
       <div class="info-item">
         <span class="info-label">Data de Ingresso no Motoclube</span>
-        <span class="info-value">${member.entryDate ? new Date(member.entryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não registrada'}</span>
+        <span class="info-value">${member.entryDate ? formatDateBR(member.entryDate) : 'Não registrada'}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Data de Graduação no Grupamento</span>
-        <span class="info-value">${member.grupamentoGraduationDate ? new Date(member.grupamentoGraduationDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não registrada'}</span>
+        <span class="info-value">${member.grupamentoGraduationDate ? formatDateBR(member.grupamentoGraduationDate) : 'Não registrada'}</span>
       </div>
     </div>
 
@@ -542,7 +543,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
       <td>${m.divisaoName}</td>
       <td style="font-weight: bold; color: ${m.status === 'Ativo' ? '#166534' : '#991b1b'};">${m.status}</td>
       <td>${m.phone || '-'}</td>
-      <td>${m.entryDate ? new Date(m.entryDate + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+      <td>${formatDateBR(m.entryDate)}</td>
     </tr>
   `).join('');
 

@@ -4,6 +4,7 @@ import { Member } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { printMemberDossier } from '../utils/printService';
+import { formatDateBR, calculateYearsInClub } from '../utils/dateUtils';
 
 interface MemberDetailModalProps {
   member: Member | null;
@@ -59,14 +60,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     onClose();
   };
 
-  const calculateYears = (dateStr: string) => {
-    if (!dateStr) return null;
-    const diff = new Date().getTime() - new Date(dateStr).getTime();
-    const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-    return years;
-  };
-
-  const yearsInClub = calculateYears(member.entryDate);
+  const yearsInClub = calculateYearsInClub(member.entryDate);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm overflow-y-auto">
@@ -163,7 +157,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
                 <span className="flex items-center gap-1.5 text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700/60">
                   <Calendar size={13} className="text-amber-400" />
-                  Desde: <strong className="text-white">{new Date(member.entryDate).toLocaleDateString('pt-BR')}</strong>
+                  Desde: <strong className="text-white">{formatDateBR(member.entryDate)}</strong>
                   {yearsInClub !== null && (
                     <span className="text-[11px] text-amber-400 font-bold">({yearsInClub} {yearsInClub === 1 ? 'ano' : 'anos'} de MC)</span>
                   )}
@@ -172,7 +166,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                 {member.grupamentoGraduationDate && (
                   <span className="flex items-center gap-1.5 text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700/60">
                     <Award size={13} className="text-purple-400" />
-                    Graduação: <strong className="text-white">{new Date(member.grupamentoGraduationDate).toLocaleDateString('pt-BR')}</strong>
+                    Graduação: <strong className="text-white">{formatDateBR(member.grupamentoGraduationDate)}</strong>
                   </span>
                 )}
               </div>

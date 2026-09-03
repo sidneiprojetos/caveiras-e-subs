@@ -4,6 +4,7 @@ import { Divisao, Member } from '../types';
 import { addActivityLog } from '../data/initialData';
 import { ConfirmDeleteModal, DeleteTargetInfo } from './ConfirmDeleteModal';
 import { printRosterReport } from '../utils/printService';
+import { getTodayDateString } from '../utils/dateUtils';
 
 interface DivisionManagerProps {
   divisoes: Divisao[];
@@ -95,7 +96,7 @@ export const DivisionManager: React.FC<DivisionManagerProps> = ({
       meetingSchedule: meetingSchedule.trim() || undefined,
       meetingLocation: meetingLocation.trim() || undefined,
       description: description.trim() || undefined,
-      createdDate: editingDivisao ? editingDivisao.createdDate : new Date().toISOString().split('T')[0],
+      createdDate: editingDivisao ? editingDivisao.createdDate : getTodayDateString(),
       active: true
     };
 

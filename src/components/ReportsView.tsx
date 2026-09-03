@@ -9,6 +9,7 @@ import {
 import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { printRosterReport } from '../utils/printService';
+import { formatDateBR } from '../utils/dateUtils';
 
 interface ReportsViewProps {
   members: Member[];
@@ -480,7 +481,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-zinc-300 font-mono">
-                    {new Date(m.entryDate).toLocaleDateString('pt-BR')}
+                    {formatDateBR(m.entryDate)}
                   </td>
                   <td className="py-2.5 px-3 font-mono text-zinc-300">
                     {m.phone || '-'}

@@ -3,6 +3,7 @@ import { Printer, Shield, Skull, MapPin, Phone, Search, FileText } from 'lucide-
 import { Member, Divisao } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { printIdCards, printMemberDossier } from '../utils/printService';
+import { formatDateBR, formatYear } from '../utils/dateUtils';
 
 interface DigitalIdCardViewProps {
   members: Member[];
@@ -143,7 +144,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
                   <Shield size={32} className="text-zinc-400" />
                 )}
                 <span className="text-[10px] font-mono font-bold text-zinc-400 mt-1">
-                  {new Date(member.entryDate).getFullYear()}
+                  {formatYear(member.entryDate)}
                 </span>
               </div>
 
@@ -173,7 +174,7 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
               <div className="bg-black/40 p-1.5 rounded-lg border border-zinc-800/60">
                 <span className="text-[9px] text-zinc-500 block uppercase">Admissão</span>
                 <span className="font-bold text-zinc-300 font-mono text-[11px]">
-                  {new Date(member.entryDate).toLocaleDateString('pt-BR')}
+                  {formatDateBR(member.entryDate)}
                 </span>
               </div>
             </div>
