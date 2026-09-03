@@ -1,4 +1,4 @@
-# Gestão Operacional Sidnei
+# Op. Sid
 
 Sistema de Gestão de Integrantes, Divisões, Credenciais e Inteligência Operacional com Gemini 3.8 Flash e Firestore.
 
