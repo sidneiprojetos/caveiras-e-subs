@@ -43,7 +43,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   grupamentos,
   onOpenGrupamentoManager
 }) => {
-  type SortField = 'coleteNumber' | 'vulgo' | 'name' | 'grupamento' | 'divisaoName' | 'status' | 'entryDate';
+  type SortField = 'coleteNumber' | 'vulgo' | 'name' | 'grupamento' | 'grupamentoNumber' | 'divisaoName' | 'status' | 'entryDate';
   const viewMode: string = 'table';
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
@@ -73,6 +73,14 @@ export const MemberList: React.FC<MemberListProps> = ({
     }
     return true;
   }).sort((a, b) => {
+    if (sortBy === 'grupamentoNumber') {
+      const grupamentoCompare = a.grupamento.localeCompare(b.grupamento);
+      if (grupamentoCompare !== 0) return sortOrder === 'asc' ? grupamentoCompare : -grupamentoCompare;
+      const numberA = a.coleteNumber ? Number(a.coleteNumber) : Number.POSITIVE_INFINITY;
+      const numberB = b.coleteNumber ? Number(b.coleteNumber) : Number.POSITIVE_INFINITY;
+      if (numberA !== numberB) return sortOrder === 'asc' ? numberA - numberB : numberB - numberA;
+      return a.vulgo.localeCompare(b.vulgo);
+    }
     if (sortBy === 'coleteNumber') {
       const numberA = a.coleteNumber ? Number(a.coleteNumber) : Number.POSITIVE_INFINITY;
       const numberB = b.coleteNumber ? Number(b.coleteNumber) : Number.POSITIVE_INFINITY;
@@ -287,6 +295,7 @@ export const MemberList: React.FC<MemberListProps> = ({
             className="bg-transparent text-zinc-200 font-medium focus:outline-none cursor-pointer"
           >
             <option value="coleteNumber" className="bg-[#12151c]">Número</option>
+            <option value="grupamentoNumber" className="bg-[#12151c]">Grupamento e Número</option>
             <option value="vulgo" className="bg-[#12151c]">Nome de Colete</option>
             <option value="name" className="bg-[#12151c]">Nome Completo</option>
             <option value="grupamento" className="bg-[#12151c]">Grupamento</option>
