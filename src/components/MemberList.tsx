@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Search, Filter, Plus, LayoutGrid, List, MapPin,
+  Search, Filter, Plus, MapPin,
   Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer, Tag, Award
 } from 'lucide-react';
 import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig } from '../types';
@@ -44,7 +44,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   onOpenGrupamentoManager
 }) => {
   type SortField = 'vulgo' | 'name' | 'grupamento' | 'divisaoName' | 'status' | 'entryDate';
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const viewMode: string = 'table';
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -185,31 +185,6 @@ export const MemberList: React.FC<MemberListProps> = ({
             <Printer size={15} className="text-amber-400" />
             <span className="hidden sm:inline">Imprimir</span>
           </button>
-
-          <div className="flex items-center bg-[#0c0e12] p-1 rounded-xl border border-zinc-800">
-            <button
-              onClick={() => setViewMode('grid')}
-              title="Visualização em Grade"
-              className={`p-2 rounded-lg transition ${
-                viewMode === 'grid'
-                  ? 'bg-zinc-800 text-white shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              <LayoutGrid size={16} />
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              title="Visualização em Tabela"
-              className={`p-2 rounded-lg transition ${
-                viewMode === 'table'
-                  ? 'bg-zinc-800 text-white shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              <List size={16} />
-            </button>
-          </div>
 
           {onOpenGrupamentoManager && (
             <button
