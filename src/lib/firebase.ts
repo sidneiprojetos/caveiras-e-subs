@@ -101,7 +101,20 @@ export const subscribeToMembers = (
       } catch (seedErr) {
         console.error('Error seeding initial members to Firestore:', seedErr);
       }
-      callback(initialData);
+
+      let synchronizedData = initialData;
+      try {
+        const latestLocal = localStorage.getItem('insanos_mc_members_v1');
+        if (latestLocal) {
+          const parsed = JSON.parse(latestLocal);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            synchronizedData = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not read latest localStorage after initial seed', e);
+      }
+      callback(synchronizedData);
     } else {
       const items: Member[] = [];
       snapshot.forEach((d) => {

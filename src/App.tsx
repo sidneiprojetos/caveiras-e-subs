@@ -200,10 +200,8 @@ export default function App() {
 
     if (isEditing) {
       updatedList = members.map(m => m.id === member.id ? member : m);
-      showToast(`Integrante ${member.vulgo} atualizado com sucesso!`);
     } else {
       updatedList = [member, ...members];
-      showToast(`Integrante ${member.vulgo} cadastrado na Op. Sid!`);
     }
 
     // Optimistic local update
@@ -220,8 +218,14 @@ export default function App() {
           : `Novo integrante cadastrado: ${member.vulgo} (${member.grupamento}) na Divisão ${member.divisaoName}.`,
         adminEmail
       );
+      showToast(
+        isEditing
+          ? `Integrante ${member.vulgo} atualizado com sucesso!`
+          : `Integrante ${member.vulgo} cadastrado na Op. Sid!`
+      );
     } catch (err) {
       console.error('Error saving member to Firestore:', err);
+      showToast(`Não foi possível salvar ${member.vulgo} no Firebase.`, 'error');
     }
   };
 
