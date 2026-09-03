@@ -43,6 +43,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   grupamentos,
   onOpenGrupamentoManager
 }) => {
+  type SortField = 'vulgo' | 'name' | 'grupamento' | 'divisaoName' | 'status' | 'entryDate';
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
@@ -50,7 +51,7 @@ export const MemberList: React.FC<MemberListProps> = ({
 
   const availableStatuses = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
   const availableGrupamentos = grupamentos && grupamentos.length > 0 ? grupamentos : DEFAULT_GRUPAMENTOS;
-  const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'entryDate' | 'divisaoName'>('vulgo');
+  const [sortBy, setSortBy] = useState<SortField>('vulgo');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
 
@@ -88,6 +89,17 @@ export const MemberList: React.FC<MemberListProps> = ({
     }
     onOpenAddMember();
   };
+
+  const handleSort = (field: SortField) => {
+    if (sortBy === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+      return;
+    }
+    setSortBy(field);
+    setSortOrder('asc');
+  };
+
+  const sortIndicator = (field: SortField) => sortBy === field ? (sortOrder === 'asc' ? '↑' : '↓') : null;
 
   const handleEditClick = (m: Member, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -290,12 +302,14 @@ export const MemberList: React.FC<MemberListProps> = ({
           <span className="text-zinc-500 text-[11px]">Ordenar por:</span>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as SortField)}
             className="bg-transparent text-zinc-200 font-medium focus:outline-none cursor-pointer"
           >
             <option value="vulgo" className="bg-[#12151c]">Nome de Colete</option>
             <option value="name" className="bg-[#12151c]">Nome Completo</option>
+            <option value="grupamento" className="bg-[#12151c]">Grupamento</option>
             <option value="divisaoName" className="bg-[#12151c]">Divisão</option>
+            <option value="status" className="bg-[#12151c]">Status</option>
             <option value="entryDate" className="bg-[#12151c]">Data de Entrada</option>
           </select>
           <button
@@ -457,11 +471,27 @@ export const MemberList: React.FC<MemberListProps> = ({
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-[#0e1117] text-zinc-400 uppercase font-semibold">
-                  <th className="py-3 px-4">Nome de Colete / Nome</th>
-                  <th className="py-3 px-4">Grupamento</th>
-                  <th className="py-3 px-4">Divisão</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Entrada no MC</th>
+                  {([
+                    ['vulgo', 'Nome de Colete / Nome'],
+                    ['grupamento', 'Grupamento'],
+                    ['divisaoName', 'Divisão'],
+                    ['status', 'Status'],
+                    ['entryDate', 'Entrada no MC']
+                  ] as [SortField, string][]).map(([field, label]) => (
+                    <th key={field} className="py-3 px-4">
+                      <button
+                        type="button"
+                        onClick={() => handleSort(field)}
+                        className="inline-flex items-center gap-1.5 hover:text-white transition"
+                        title={`Ordenar por ${label}`}
+                      >
+                        {label}
+                        <span className="text-red-400 text-sm leading-none" aria-hidden="true">
+                          {sortIndicator(field) || '↕'}
+                        </span>
+                      </button>
+                    </th>
+                  ))}
                   <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
               </thead>
