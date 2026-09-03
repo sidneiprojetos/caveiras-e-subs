@@ -1,4 +1,4 @@
-import { Divisao, Member, ActivityLog } from '../types';
+import { Divisao, Member, ActivityLog, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
 
 export const INITIAL_DIVISOES: Divisao[] = [
   {
@@ -269,6 +269,29 @@ const STORAGE_KEYS = {
   LOGS: 'insanos_mc_logs_v1',
   ADMIN_PIN: 'insanos_mc_admin_pin_v1',
   ADMIN_SESSION: 'insanos_mc_admin_session_v1',
+  STATUSES: 'insanos_mc_statuses_v1',
+};
+
+export const getStoredStatuses = (): MemberStatusConfig[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.STATUSES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error loading statuses from localStorage', e);
+  }
+  saveStoredStatuses(DEFAULT_MEMBER_STATUSES);
+  return DEFAULT_MEMBER_STATUSES;
+};
+
+export const saveStoredStatuses = (statuses: MemberStatusConfig[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.STATUSES, JSON.stringify(statuses));
+  } catch (e) {
+    console.error('Error saving statuses', e);
+  }
 };
 
 export const getStoredDivisoes = (): Divisao[] => {

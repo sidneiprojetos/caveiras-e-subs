@@ -13,8 +13,8 @@ import {
   orderBy
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { Member, Divisao, ActivityLog, AdminUser } from '../types';
-import { INITIAL_MEMBERS, INITIAL_DIVISOES, INITIAL_LOGS } from '../data/initialData';
+import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
+import { INITIAL_MEMBERS, INITIAL_DIVISOES, INITIAL_LOGS, getStoredStatuses } from '../data/initialData';
 
 // Initialize Firebase App singleton
 const app = getApps().length > 0 ? getApp() : initializeApp({
@@ -60,7 +60,8 @@ const COLLECTIONS = {
   DIVISOES: 'divisoes',
   LOGS: 'logs',
   SETTINGS: 'settings',
-  ADMINS: 'admins'
+  ADMINS: 'admins',
+  STATUSES: 'statuses'
 };
 
 /**
@@ -353,5 +354,66 @@ export const subscribeToAdmins = (
     console.error('Error subscribing to admins:', err);
     if (onError) onError(err);
   });
+};
+
+/**
+ * Real-time subscription to Member Statuses with auto-seed if cloud collection is empty
+ */
+export const subscribeToStatuses = (
+  callback: (statuses: MemberStatusConfig[]) => void,
+  onError?: (error: any) => void
+) => {
+  const colRef = collection(db, COLLECTIONS.STATUSES);
+
+  return onSnapshot(colRef, async (snapshot) => {
+    if (snapshot.empty) {
+      let initialData = getStoredStatuses();
+      try {
+        const batch = writeBatch(db);
+        initialData.forEach((st) => {
+          const docRef = doc(db, COLLECTIONS.STATUSES, st.id);
+          batch.set(docRef, st);
+        });
+        await batch.commit();
+      } catch (seedErr) {
+        console.error('Error seeding initial statuses to Firestore:', seedErr);
+      }
+      callback(initialData);
+    } else {
+      const items: MemberStatusConfig[] = [];
+      snapshot.forEach((d) => {
+        items.push(d.data() as MemberStatusConfig);
+      });
+      // Sort: defaults first, then custom alphabetically
+      items.sort((a, b) => {
+        if (a.isDefault && !b.isDefault) return -1;
+        if (!a.isDefault && b.isDefault) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      callback(items);
+      try {
+        localStorage.setItem('insanos_mc_statuses_v1', JSON.stringify(items));
+      } catch (e) {}
+    }
+  }, (err) => {
+    console.error('Firestore statuses subscription error:', err);
+    if (onError) onError(err);
+  });
+};
+
+/**
+ * Save or update MemberStatus in Firestore
+ */
+export const saveStatusToFirestore = async (status: MemberStatusConfig): Promise<void> => {
+  const docRef = doc(db, COLLECTIONS.STATUSES, status.id);
+  await setDoc(docRef, status, { merge: true });
+};
+
+/**
+ * Delete MemberStatus from Firestore
+ */
+export const deleteStatusFromFirestore = async (statusId: string): Promise<void> => {
+  const docRef = doc(db, COLLECTIONS.STATUSES, statusId);
+  await deleteDoc(docRef);
 };
 

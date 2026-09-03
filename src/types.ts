@@ -53,7 +53,54 @@ export interface Divisao {
   description?: string;
 }
 
-export type MemberStatus = 'Ativo' | 'Em Observação' | 'Licença' | 'Honorário';
+export type StatusColor = 'emerald' | 'amber' | 'blue' | 'purple' | 'red' | 'orange' | 'cyan' | 'zinc';
+
+export interface MemberStatusConfig {
+  id: string;
+  name: string;
+  description?: string;
+  color: StatusColor;
+  isDefault?: boolean;
+  active: boolean;
+  createdAt?: string;
+}
+
+export const DEFAULT_MEMBER_STATUSES: MemberStatusConfig[] = [
+  {
+    id: 'status-ativo',
+    name: 'Ativo',
+    description: 'Integrante ativo, rodando e frequente nas reuniões e comboios',
+    color: 'emerald',
+    isDefault: true,
+    active: true
+  },
+  {
+    id: 'status-em-observacao',
+    name: 'Em Observação',
+    description: 'Integrante em período de observação ou avaliação tática',
+    color: 'amber',
+    isDefault: true,
+    active: true
+  },
+  {
+    id: 'status-licenca',
+    name: 'Licença',
+    description: 'Afastamento temporário acordado com a diretoria',
+    color: 'blue',
+    isDefault: true,
+    active: true
+  },
+  {
+    id: 'status-honorario',
+    name: 'Honorário',
+    description: 'Membro com honraria especial concedida pelo moto clube',
+    color: 'purple',
+    isDefault: true,
+    active: true
+  }
+];
+
+export type MemberStatus = string;
 
 export interface Member {
   id: string;

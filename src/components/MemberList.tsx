@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { 
   Search, Filter, Plus, LayoutGrid, List, Phone, MapPin, 
-  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer
+  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer, Tag
 } from 'lucide-react';
-import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
+import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { MemberStatusBadge } from './MemberStatusBadge';
 import { ConfirmDeleteModal, DeleteTargetInfo } from './ConfirmDeleteModal';
 import { printRosterReport, printMemberDossier } from '../utils/printService';
 import { formatDateBR } from '../utils/dateUtils';
@@ -20,6 +21,8 @@ interface MemberListProps {
   onRequireAdmin: () => void;
   currentDivisionFilter: string;
   onDivisionFilterChange: (divId: string) => void;
+  statuses?: MemberStatusConfig[];
+  onOpenStatusManager?: () => void;
 }
 
 export const MemberList: React.FC<MemberListProps> = ({
@@ -32,12 +35,16 @@ export const MemberList: React.FC<MemberListProps> = ({
   isAdmin,
   onRequireAdmin,
   currentDivisionFilter,
-  onDivisionFilterChange
+  onDivisionFilterChange,
+  statuses,
+  onOpenStatusManager
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
   const [grupamentoFilter, setGrupamentoFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const availableStatuses = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
   const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'entryDate' | 'divisaoName'>('vulgo');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
@@ -192,6 +199,17 @@ export const MemberList: React.FC<MemberListProps> = ({
             </button>
           </div>
 
+          {onOpenStatusManager && (
+            <button
+              onClick={onOpenStatusManager}
+              className="px-3.5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 hover:border-amber-500/50 font-bold rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2"
+              title="Gerenciar e cadastrar novos status dos integrantes"
+            >
+              <Tag size={15} className="text-amber-400" />
+              <span>Status ({availableStatuses.length})</span>
+            </button>
+          )}
+
           <button
             onClick={handleAddClick}
             className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-red-950 flex items-center gap-2"
@@ -247,11 +265,12 @@ export const MemberList: React.FC<MemberListProps> = ({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
           >
-            <option value="all" className="bg-[#12151c]">Todos os Status</option>
-            <option value="Ativo" className="bg-[#12151c]">Ativo</option>
-            <option value="Em Observação" className="bg-[#12151c]">Em Observação</option>
-            <option value="Licença" className="bg-[#12151c]">Licença</option>
-            <option value="Honorário" className="bg-[#12151c]">Honorário</option>
+            <option value="all" className="bg-[#12151c]">Todos os Status ({availableStatuses.length})</option>
+            {availableStatuses.map((st) => (
+              <option key={st.id || st.name} value={st.name} className="bg-[#12151c]">
+                {st.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -331,11 +350,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                       <span className="text-[11px] font-semibold text-zinc-400 truncate">
                         {member.divisaoName}
                       </span>
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
-                        member.status === 'Ativo' ? 'text-emerald-400 bg-emerald-950/60 border border-emerald-800' : 'text-amber-400 bg-amber-950/60 border border-amber-800'
-                      }`}>
-                        {member.status}
-                      </span>
+                      <MemberStatusBadge status={member.status} statuses={statuses} size="sm" />
                     </div>
 
                     <h3 className="text-base font-black text-white font-cinzel truncate group-hover:text-red-400 transition leading-tight mt-0.5">
@@ -486,11 +501,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                       {m.divisaoName}
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        m.status === 'Ativo' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'
-                      }`}>
-                        {m.status}
-                      </span>
+                      <MemberStatusBadge status={m.status} statuses={statuses} size="sm" />
                     </td>
                     <td className="py-3 px-4 text-zinc-300 font-medium">
                       {formatDateBR(m.entryDate)}

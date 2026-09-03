@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { X, Phone, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Mail } from 'lucide-react';
-import { Member } from '../types';
+import { Member, MemberStatusConfig } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { MemberStatusBadge } from './MemberStatusBadge';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { printMemberDossier } from '../utils/printService';
 import { formatDateBR, calculateYearsInClub } from '../utils/dateUtils';
@@ -14,6 +15,7 @@ interface MemberDetailModalProps {
   onDelete: (memberId: string) => void;
   isAdmin: boolean;
   onRequireAdmin?: () => void;
+  statuses?: MemberStatusConfig[];
 }
 
 export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
@@ -23,7 +25,8 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   onEdit,
   onDelete,
   isAdmin,
-  onRequireAdmin
+  onRequireAdmin,
+  statuses
 }) => {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
@@ -128,11 +131,9 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                   <Shield size={40} className="text-zinc-400" />
                 )}
               </div>
-              <span className={`absolute -bottom-2 -right-2 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border shadow-md ${
-                member.status === 'Ativo' ? 'bg-emerald-950 border-emerald-700 text-emerald-400' : 'bg-amber-950 border-amber-700 text-amber-400'
-              }`}>
-                {member.status}
-              </span>
+              <div className="absolute -bottom-2.5 -right-2 shadow-lg">
+                <MemberStatusBadge status={member.status} statuses={statuses} size="sm" />
+              </div>
             </div>
 
             <div className="flex-1 text-center sm:text-left space-y-2">

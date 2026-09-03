@@ -71,6 +71,20 @@
         { "name": "permissions", "type": "array", "description": "Permissões operacionais completas" },
         { "name": "grantedAt", "type": "string", "description": "Data de concessão do acesso" }
       ]
+    },
+    {
+      "name": "MemberStatus",
+      "description": "Situações e status operacionais dos integrantes (Ativo, Em Observação, Licença, etc.)",
+      "collection": "statuses",
+      "fields": [
+        { "name": "id", "type": "string", "description": "Identificador único do status" },
+        { "name": "name", "type": "string", "description": "Nome do status (Ativo, Afastado, Próspero, etc.)" },
+        { "name": "description", "type": "string", "description": "Descrição operacional da situação" },
+        { "name": "color", "type": "string", "description": "Cor do badge (emerald, amber, blue, red, etc.)" },
+        { "name": "isDefault", "type": "boolean", "description": "Se é um status padrão do sistema" },
+        { "name": "active", "type": "boolean", "description": "Se o status está ativo para seleção" },
+        { "name": "createdAt", "type": "string", "description": "Timestamp de criação" }
+      ]
     }
   ],
   "securityRules": {

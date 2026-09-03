@@ -4,10 +4,11 @@ import {
 } from 'recharts';
 import { 
   Printer, Download, FileSpreadsheet, Shield, Skull, Crosshair, Star, 
-  Users, MapPin, Filter, Upload, CheckCircle2
+  Users, MapPin, Filter, Upload, CheckCircle2, Tag
 } from 'lucide-react';
-import { Member, Divisao, DEFAULT_GRUPAMENTOS } from '../types';
+import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { MemberStatusBadge } from './MemberStatusBadge';
 import { printRosterReport } from '../utils/printService';
 import { formatDateBR } from '../utils/dateUtils';
 
@@ -15,17 +16,21 @@ interface ReportsViewProps {
   members: Member[];
   divisoes: Divisao[];
   onImportBackup: (importedMembers: Member[], importedDivisoes: Divisao[]) => void;
+  statuses?: MemberStatusConfig[];
 }
 
 export const ReportsView: React.FC<ReportsViewProps> = ({
   members,
   divisoes,
-  onImportBackup
+  onImportBackup,
+  statuses
 }) => {
   const [filterDivisao, setFilterDivisao] = useState<string>('all');
   const [filterGrupamento, setFilterGrupamento] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [importStatus, setImportStatus] = useState<string>('');
+
+  const availableStatuses = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
 
   // Calculations for KPI
   const totalMembers = members.length;
@@ -280,6 +285,35 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
       </div>
 
+      {/* Dynamic Status Breakdown Ribbon */}
+      <div className="bg-[#101319] border border-zinc-800/80 p-3.5 rounded-xl flex flex-wrap items-center gap-2 text-xs no-print">
+        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5 mr-2">
+          <Tag size={13} className="text-amber-400" />
+          Efetivo por Status:
+        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {availableStatuses.map((st) => {
+            const count = members.filter(m => m.status === st.name).length;
+            const percentage = Math.round((count / (totalMembers || 1)) * 100);
+            return (
+              <button
+                key={st.id || st.name}
+                type="button"
+                onClick={() => setFilterStatus(filterStatus === st.name ? 'all' : st.name)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-800 transition cursor-pointer text-xs ${
+                  filterStatus === st.name ? 'ring-2 ring-amber-400/80 bg-zinc-800/80' : 'bg-[#0c0e12] hover:bg-zinc-800/50'
+                }`}
+                title={`Filtrar por ${st.name}`}
+              >
+                <MemberStatusBadge status={st.name} statuses={statuses} size="sm" />
+                <span className="font-bold text-white font-mono">{count}</span>
+                <span className="text-[10px] text-zinc-500">({percentage}%)</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Visual Analytics Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 no-print">
         {/* Grupamentos Pie Chart */}
@@ -415,13 +449,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
+            className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 cursor-pointer"
           >
-            <option value="all">Todos os Status</option>
-            <option value="Ativo">Ativo</option>
-            <option value="Em Observação">Em Observação</option>
-            <option value="Licença">Licença</option>
-            <option value="Honorário">Honorário</option>
+            <option value="all">Todos os Status ({availableStatuses.length})</option>
+            {availableStatuses.map((st) => (
+              <option key={st.id || st.name} value={st.name}>
+                {st.name}
+              </option>
+            ))}
           </select>
 
           {(filterDivisao !== 'all' || filterGrupamento !== 'all' || filterStatus !== 'all') && (
@@ -474,11 +509,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                     {m.divisaoName}
                   </td>
                   <td className="py-2.5 px-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      m.status === 'Ativo' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'
-                    }`}>
-                      {m.status}
-                    </span>
+                    <MemberStatusBadge status={m.status} statuses={statuses} size="sm" />
                   </td>
                   <td className="py-2.5 px-3 text-zinc-300 font-mono">
                     {formatDateBR(m.entryDate)}

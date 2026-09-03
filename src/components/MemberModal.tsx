@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Member, Divisao, MemberStatus, DEFAULT_GRUPAMENTOS } from '../types';
+import { Member, Divisao, MemberStatus, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, StatusColor } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { MemberStatusBadge } from './MemberStatusBadge';
+import { STATUS_COLOR_OPTIONS } from '../utils/statusUtils';
 import { getTodayDateString } from '../utils/dateUtils';
 import { 
   X as CloseIcon, 
@@ -9,7 +11,10 @@ import {
   Check as CheckIcon, 
   AlertTriangle as AlertIcon,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Plus,
+  Tag,
+  Settings2
 } from 'lucide-react';
 
 interface MemberModalProps {
@@ -18,6 +23,9 @@ interface MemberModalProps {
   onSave: (member: Member) => void;
   memberToEdit?: Member | null;
   divisoes: Divisao[];
+  statuses?: MemberStatusConfig[];
+  onOpenStatusManager?: () => void;
+  onSaveStatus?: (status: MemberStatusConfig) => Promise<void> | void;
 }
 
 export const MemberModal: React.FC<MemberModalProps> = ({
@@ -25,7 +33,10 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   onClose,
   onSave,
   memberToEdit,
-  divisoes
+  divisoes,
+  statuses,
+  onOpenStatusManager,
+  onSaveStatus
 }) => {
   const [activeTab, setActiveTab] = useState<'geral' | 'grupamento'>('geral');
   
@@ -42,6 +53,15 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   const [observations, setObservations] = useState('');
 
   const [formError, setFormError] = useState('');
+
+  // Quick Inline Status Creator state
+  const [showQuickStatusForm, setShowQuickStatusForm] = useState(false);
+  const [quickStatusName, setQuickStatusName] = useState('');
+  const [quickStatusColor, setQuickStatusColor] = useState<StatusColor>('emerald');
+  const [quickStatusError, setQuickStatusError] = useState('');
+  const [isSavingQuickStatus, setIsSavingQuickStatus] = useState(false);
+
+  const activeStatusesList = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
 
   useEffect(() => {
     if (memberToEdit) {
@@ -276,19 +296,154 @@ export const MemberModal: React.FC<MemberModalProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">
-                    Status do Integrante
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-zinc-300">
+                      Status do Integrante
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowQuickStatusForm(!showQuickStatusForm);
+                          setQuickStatusError('');
+                        }}
+                        className="text-[11px] text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 transition cursor-pointer"
+                        title="Cadastrar novo status"
+                      >
+                        <Plus size={12} />
+                        <span>{showQuickStatusForm ? 'Fechar' : '+ Novo Status'}</span>
+                      </button>
+                      {onOpenStatusManager && (
+                        <button
+                          type="button"
+                          onClick={onOpenStatusManager}
+                          className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-0.5 transition cursor-pointer"
+                          title="Gerenciar lista de status"
+                        >
+                          <Settings2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Inline quick status creator */}
+                  {showQuickStatusForm && (
+                    <div className="mb-2 p-3 bg-[#131722] border border-amber-500/40 rounded-xl space-y-2.5 animate-fade-in shadow-lg">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-amber-400">
+                        <span className="flex items-center gap-1">
+                          <Tag size={12} />
+                          Criar e Selecionar Status
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowQuickStatusForm(false)}
+                          className="text-zinc-400 hover:text-white text-[10px]"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      {quickStatusError && (
+                        <p className="text-[10px] text-red-400 bg-red-950/50 p-1.5 rounded border border-red-800">
+                          {quickStatusError}
+                        </p>
+                      )}
+
+                      <div>
+                        <input
+                          type="text"
+                          value={quickStatusName}
+                          onChange={(e) => setQuickStatusName(e.target.value)}
+                          placeholder="Nome (ex: Afastado, Próspero, Reserva...)"
+                          className="w-full bg-[#0a0c10] border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                          autoFocus
+                        />
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] text-zinc-400 block mb-1">Cor do Badge:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {STATUS_COLOR_OPTIONS.map((opt) => (
+                            <button
+                              key={opt.color}
+                              type="button"
+                              onClick={() => setQuickStatusColor(opt.color)}
+                              className={`w-5 h-5 rounded-full ${opt.previewClass} transition ${
+                                quickStatusColor === opt.color ? 'ring-2 ring-white scale-110' : 'opacity-60 hover:opacity-100'
+                              }`}
+                              title={opt.label}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowQuickStatusForm(false)}
+                          className="px-2 py-1 rounded text-[10px] text-zinc-400 hover:text-white"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isSavingQuickStatus}
+                          onClick={async () => {
+                            const trimmed = quickStatusName.trim();
+                            if (!trimmed) {
+                              setQuickStatusError('Informe o nome do status.');
+                              return;
+                            }
+                            setIsSavingQuickStatus(true);
+                            try {
+                              const newStatusObj: MemberStatusConfig = {
+                                id: `status-${Date.now()}`,
+                                name: trimmed,
+                                color: quickStatusColor,
+                                isDefault: false,
+                                active: true,
+                                createdAt: new Date().toISOString()
+                              };
+                              if (onSaveStatus) {
+                                await onSaveStatus(newStatusObj);
+                              }
+                              setStatus(trimmed);
+                              setQuickStatusName('');
+                              setShowQuickStatusForm(false);
+                            } catch (err: any) {
+                              setQuickStatusError(err?.message || 'Erro ao cadastrar.');
+                            } finally {
+                              setIsSavingQuickStatus(false);
+                            }
+                          }}
+                          className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold rounded shadow transition"
+                        >
+                          {isSavingQuickStatus ? 'Salvando...' : 'Salvar e Selecionar'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <select
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as MemberStatus)}
+                    onChange={(e) => setStatus(e.target.value)}
                     className="w-full bg-[#0c0e12] border border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 cursor-pointer"
                   >
-                    <option value="Ativo" className="bg-[#12151c]">Ativo (Rodando / Frequente)</option>
-                    <option value="Em Observação" className="bg-[#12151c]">Em Observação</option>
-                    <option value="Licença" className="bg-[#12151c]">Licença Temporária</option>
-                    <option value="Honorário" className="bg-[#12151c]">Honorário</option>
+                    {activeStatusesList.map((st) => (
+                      <option key={st.id || st.name} value={st.name} className="bg-[#12151c]">
+                        {st.name} {st.description ? `(${st.description})` : ''}
+                      </option>
+                    ))}
+                    {/* Fallback if member's current status isn't in activeStatusesList */}
+                    {!activeStatusesList.some(s => s.name === status) && (
+                      <option value={status} className="bg-[#12151c]">{status}</option>
+                    )}
                   </select>
+
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <span className="text-[11px] text-zinc-500">Badge ativo:</span>
+                    <MemberStatusBadge status={status} statuses={activeStatusesList} size="sm" />
+                  </div>
                 </div>
 
                 <div>

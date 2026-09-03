@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   getStoredMembers, saveStoredMembers, 
   getStoredDivisoes, saveStoredDivisoes, 
-  getStoredLogs, addActivityLog 
+  getStoredLogs, addActivityLog,
+  getStoredStatuses, saveStoredStatuses
 } from './data/initialData';
 import { 
   subscribeToMembers, 
@@ -16,9 +17,12 @@ import {
   importAllToFirestore,
   initSuperAdminInFirestore,
   subscribeToAdmins,
+  subscribeToStatuses,
+  saveStatusToFirestore,
+  deleteStatusFromFirestore,
   SUPER_ADMIN_EMAIL
 } from './lib/firebase';
-import { Member, Divisao, ActivityLog, AdminUser } from './types';
+import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from './types';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { MemberList } from './components/MemberList';
 import { DivisionManager } from './components/DivisionManager';
@@ -27,6 +31,7 @@ import { DigitalIdCardView } from './components/DigitalIdCardView';
 import { AuditLogsView } from './components/AuditLogsView';
 import { MemberModal } from './components/MemberModal';
 import { MemberDetailModal } from './components/MemberDetailModal';
+import { StatusManagerModal } from './components/StatusManagerModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { CrudTestModal } from './components/CrudTestModal';
 import { PrintPreviewModal } from './components/PrintPreviewModal';
@@ -38,6 +43,7 @@ export default function App() {
   // Main Data States
   const [members, setMembers] = useState<Member[]>([]);
   const [divisoes, setDivisoes] = useState<Divisao[]>([]);
+  const [statuses, setStatuses] = useState<MemberStatusConfig[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [isFirestoreConnected, setIsFirestoreConnected] = useState<boolean>(true);
 
@@ -50,6 +56,7 @@ export default function App() {
   const [adminEmail, setAdminEmail] = useState<string>(SUPER_ADMIN_EMAIL);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isCrudTestModalOpen, setIsCrudTestModalOpen] = useState<boolean>(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState<boolean>(false);
 
   // Member Modals
   const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);
@@ -76,6 +83,7 @@ export default function App() {
     setDivisoes(loadedDivisoes);
     setMembers(loadedMembers);
     setLogs(loadedLogs);
+    setStatuses(getStoredStatuses());
 
     // Subscribe to Firestore in Real Time
     const unsubMembers = subscribeToMembers(
@@ -94,6 +102,18 @@ export default function App() {
       },
       (err) => {
         console.warn('Firestore divisoes sync warning:', err);
+      }
+    );
+
+    const unsubStatuses = subscribeToStatuses(
+      (cloudStatuses) => {
+        if (cloudStatuses && cloudStatuses.length > 0) {
+          setStatuses(cloudStatuses);
+          saveStoredStatuses(cloudStatuses);
+        }
+      },
+      (err) => {
+        console.warn('Firestore statuses sync warning:', err);
       }
     );
 
@@ -119,6 +139,7 @@ export default function App() {
     return () => {
       unsubMembers();
       unsubDivisoes();
+      unsubStatuses();
       unsubLogs();
       unsubAdmins();
     };
@@ -133,6 +154,43 @@ export default function App() {
   const handleSaveDivisoes = (updatedDivisoes: Divisao[]) => {
     setDivisoes(updatedDivisoes);
     saveStoredDivisoes(updatedDivisoes);
+  };
+
+  // Status Management Handlers
+  const handleSaveStatus = async (statusConfig: MemberStatusConfig) => {
+    const existingIndex = statuses.findIndex(s => s.id === statusConfig.id || s.name.toLowerCase() === statusConfig.name.toLowerCase());
+    let updatedList: MemberStatusConfig[];
+    if (existingIndex >= 0) {
+      updatedList = [...statuses];
+      updatedList[existingIndex] = statusConfig;
+    } else {
+      updatedList = [...statuses, statusConfig];
+    }
+    setStatuses(updatedList);
+    saveStoredStatuses(updatedList);
+
+    try {
+      await saveStatusToFirestore(statusConfig);
+      showToast(`Status "${statusConfig.name}" configurado com sucesso!`);
+    } catch (e: any) {
+      console.warn('Firestore save status error, kept in local storage:', e);
+      showToast(`Status salvo localmente!`);
+    }
+  };
+
+  const handleDeleteStatus = async (statusId: string) => {
+    const statusToDelete = statuses.find(s => s.id === statusId);
+    const updatedList = statuses.filter(s => s.id !== statusId);
+    setStatuses(updatedList);
+    saveStoredStatuses(updatedList);
+
+    try {
+      await deleteStatusFromFirestore(statusId);
+      showToast(`Status "${statusToDelete?.name || ''}" removido.`);
+    } catch (e: any) {
+      console.warn('Firestore delete status error, removed from local storage:', e);
+      showToast(`Status removido localmente.`);
+    }
   };
 
   // Member CRUD Actions (Synced to Firestore Cloud)
@@ -338,6 +396,8 @@ export default function App() {
             onRequireAdmin={() => setIsAdminModalOpen(true)}
             currentDivisionFilter={divisionFilter}
             onDivisionFilterChange={setDivisionFilter}
+            statuses={statuses}
+            onOpenStatusManager={() => setIsStatusModalOpen(true)}
           />
         )}
 
@@ -359,6 +419,7 @@ export default function App() {
             members={members}
             divisoes={divisoes}
             onImportBackup={handleImportBackup}
+            statuses={statuses}
           />
         )}
 
@@ -366,6 +427,7 @@ export default function App() {
           <DigitalIdCardView
             members={members}
             divisoes={divisoes}
+            statuses={statuses}
           />
         )}
 
@@ -397,6 +459,9 @@ export default function App() {
         onSave={handleAddOrUpdateMember}
         memberToEdit={memberToEdit}
         divisoes={divisoes}
+        statuses={statuses}
+        onOpenStatusManager={() => setIsStatusModalOpen(true)}
+        onSaveStatus={handleSaveStatus}
       />
 
       <MemberDetailModal
@@ -412,6 +477,18 @@ export default function App() {
           handleDeleteMember(id);
           setSelectedMemberDetail(null);
         }}
+        isAdmin={isAdmin}
+        onRequireAdmin={() => setIsAdminModalOpen(true)}
+        statuses={statuses}
+      />
+
+      <StatusManagerModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        statuses={statuses}
+        onSaveStatus={handleSaveStatus}
+        onDeleteStatus={handleDeleteStatus}
+        members={members}
         isAdmin={isAdmin}
         onRequireAdmin={() => setIsAdminModalOpen(true)}
       />

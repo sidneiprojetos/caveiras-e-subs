@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
-import { Printer, Shield, Skull, MapPin, Phone, Search, FileText } from 'lucide-react';
-import { Member, Divisao } from '../types';
+import { Printer, Shield, Skull, MapPin, Phone, Search, FileText, Tag } from 'lucide-react';
+import { Member, Divisao, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
+import { MemberStatusBadge } from './MemberStatusBadge';
 import { printIdCards, printMemberDossier } from '../utils/printService';
 import { formatDateBR, formatYear } from '../utils/dateUtils';
 
 interface DigitalIdCardViewProps {
   members: Member[];
   divisoes: Divisao[];
+  statuses?: MemberStatusConfig[];
 }
 
 export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
   members,
-  divisoes
+  divisoes,
+  statuses
 }) => {
   const [selectedDivisao, setSelectedDivisao] = useState<string>('all');
   const [selectedGrupamento, setSelectedGrupamento] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [search, setSearch] = useState('');
+
+  const availableStatuses = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
 
   const filteredMembers = members.filter(m => {
     if (selectedDivisao !== 'all' && m.divisaoId !== selectedDivisao) return false;
     if (selectedGrupamento !== 'all' && m.grupamento !== selectedGrupamento) return false;
+    if (selectedStatus !== 'all' && m.status !== selectedStatus) return false;
     if (search) {
       const q = search.toLowerCase();
       const matchName = m.name.toLowerCase().includes(q);
@@ -87,13 +94,24 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
         <select
           value={selectedGrupamento}
           onChange={(e) => setSelectedGrupamento(e.target.value)}
-          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium"
+          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium cursor-pointer"
         >
           <option value="all">Todos os Grupamentos</option>
           <option value="Caveira">Caveira</option>
           <option value="Subdiretor">Subdiretor</option>
           <option value="Operacional Regional">Operacional Regional</option>
           <option value="Subdiretor / Caveira">Subdiretor / Caveira</option>
+        </select>
+
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="bg-[#0c0e12] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium cursor-pointer"
+        >
+          <option value="all">Todos os Status ({availableStatuses.length})</option>
+          {availableStatuses.map((st) => (
+            <option key={st.id || st.name} value={st.name}>{st.name}</option>
+          ))}
         </select>
       </div>
 
@@ -181,9 +199,12 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
 
             {/* Status footnote and actions */}
             <div className="mt-3 flex items-center justify-between text-[10px] text-zinc-400 bg-zinc-900/80 px-2.5 py-1.5 rounded-lg border border-zinc-800">
-              <span className="truncate">
-                📞 {member.phone || 'Sem telefone'}
-              </span>
+              <div className="flex items-center gap-2 truncate">
+                <span className="truncate">
+                  📞 {member.phone || 'Sem telefone'}
+                </span>
+                <MemberStatusBadge status={member.status} statuses={statuses} size="sm" />
+              </div>
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
                 <button
                   type="button"

@@ -1,5 +1,6 @@
 import { Member, Divisao, ActivityLog } from '../types';
 import { formatDateBR } from './dateUtils';
+import { getStatusStyle } from './statusUtils';
 
 export interface PrintModalData {
   isOpen: boolean;
@@ -412,7 +413,7 @@ export function printMemberDossier(member: Member): Promise<boolean> {
       <div class="meta-badge">
         <div><strong>Documento Oficial de Registro</strong></div>
         <div>Emissão: ${printDate}</div>
-        <div>Situação: <span style="color: ${member.status === 'Ativo' ? '#166534' : '#991b1b'}; font-weight: 800;">${member.status.toUpperCase()}</span></div>
+        <div>Situação: <span style="color: ${getStatusStyle(member.status).printColor}; font-weight: 800;">${member.status.toUpperCase()}</span></div>
       </div>
     </div>
 
@@ -541,7 +542,7 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
       <td>${m.name}</td>
       <td style="font-weight: 600;">${m.grupamento}</td>
       <td>${m.divisaoName}</td>
-      <td style="font-weight: bold; color: ${m.status === 'Ativo' ? '#166534' : '#991b1b'};">${m.status}</td>
+      <td style="font-weight: bold; color: ${getStatusStyle(m.status).printColor};">${m.status}</td>
       <td>${m.phone || '-'}</td>
       <td>${formatDateBR(m.entryDate)}</td>
     </tr>
