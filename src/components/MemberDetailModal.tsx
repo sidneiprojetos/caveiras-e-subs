@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Phone, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Mail, Star, Crosshair, Zap, Flame, Flag } from 'lucide-react';
+import { X, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Star, Crosshair, Zap, Flame, Flag } from 'lucide-react';
 import { Member, MemberStatusConfig, GrupamentoConfig } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { MemberStatusBadge } from './MemberStatusBadge';
@@ -60,11 +60,6 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
   const handlePrint = () => {
     printMemberDossier(member);
-  };
-
-  const getCleanPhone = (p: string) => {
-    const digits = p.replace(/\D/g, '');
-    return digits.startsWith('55') ? digits : `55${digits}`;
   };
 
   const handleEditClick = () => {
@@ -188,50 +183,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                   )}
                 </span>
 
-                {member.grupamentoGraduationDate && (
-                  <span className="flex items-center gap-1.5 text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700/60">
-                    <Award size={13} className="text-purple-400" />
-                    Graduação: <strong className="text-white">{formatDateBR(member.grupamentoGraduationDate)}</strong>
-                  </span>
-                )}
               </div>
-            </div>
-          </div>
-
-          {/* Contact Details Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
-              <div>
-                <span className="text-[11px] text-zinc-400 block">Contato Telefônico</span>
-                <span className="text-sm font-semibold text-white">{member.phone || 'Não informado'}</span>
-              </div>
-              {member.phone && (
-                <a
-                  href={`https://wa.me/${getCleanPhone(member.phone)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
-                >
-                  <Phone size={13} />
-                  WhatsApp
-                </a>
-              )}
-            </div>
-
-            <div className="bg-[#151921] border border-zinc-800 rounded-xl p-3.5 flex items-center justify-between">
-              <div>
-                <span className="text-[11px] text-zinc-400 block">E-mail Cadastrado</span>
-                <span className="text-sm font-semibold text-white truncate max-w-[200px]">{member.email || 'Não informado'}</span>
-              </div>
-              {member.email && (
-                <a
-                  href={`mailto:${member.email}`}
-                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
-                >
-                  <Mail size={13} />
-                  Enviar
-                </a>
-              )}
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Search, Filter, Plus, LayoutGrid, List, Phone, MapPin, 
+  Search, Filter, Plus, LayoutGrid, List, MapPin,
   Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer, Tag, Award
 } from 'lucide-react';
 import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig } from '../types';
@@ -80,11 +80,6 @@ export const MemberList: React.FC<MemberListProps> = ({
     if (fieldA > fieldB) return sortOrder === 'asc' ? 1 : -1;
     return 0;
   });
-
-  const getCleanPhone = (p: string) => {
-    const digits = p.replace(/\D/g, '');
-    return digits.startsWith('55') ? digits : `55${digits}`;
-  };
 
   const handleAddClick = () => {
     if (!isAdmin) {
@@ -408,24 +403,6 @@ export const MemberList: React.FC<MemberListProps> = ({
 
               {/* Action buttons at bottom */}
               <div className="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {member.phone && (
-                    <a
-                      href={`https://wa.me/${getCleanPhone(member.phone)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      title="Conversar no WhatsApp"
-                      className="p-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-800 text-emerald-400 transition"
-                    >
-                      <Phone size={13} />
-                    </a>
-                  )}
-                  <span className="text-[11px] text-zinc-500 font-mono">
-                    {member.phone || 'Sem telefone'}
-                  </span>
-                </div>
-
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
@@ -532,18 +509,6 @@ export const MemberList: React.FC<MemberListProps> = ({
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        {m.phone && (
-                          <a
-                            href={`https://wa.me/${getCleanPhone(m.phone)}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 transition"
-                            title="WhatsApp"
-                          >
-                            <Phone size={13} />
-                          </a>
-                        )}
-
                         <button
                           type="button"
                           onClick={() => printMemberDossier(m)}

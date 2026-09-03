@@ -108,10 +108,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       'Grupamento',
       'Divisão',
       'Status',
-      'Telefone',
-      'Email',
-      'Data de Entrada',
-      'Data de Graduação'
+      'Data de Entrada'
     ];
 
     const rows = filteredRoster.map(m => [
@@ -120,10 +117,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       `"${m.grupamento}"`,
       `"${m.divisaoName}"`,
       `"${m.status}"`,
-      `"${m.phone}"`,
-      `"${m.email || ''}"`,
-      `"${m.entryDate}"`,
-      `"${m.grupamentoGraduationDate || ''}"`
+      `"${m.entryDate}"`
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
@@ -515,7 +509,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 <th className="py-3 px-3">Divisão</th>
                 <th className="py-3 px-3">Status</th>
                 <th className="py-3 px-3">Data Admissão</th>
-                <th className="py-3 px-3">Telefone</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
@@ -541,15 +534,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <td className="py-2.5 px-3 text-zinc-300 font-mono">
                     {formatDateBR(m.entryDate)}
                   </td>
-                  <td className="py-2.5 px-3 font-mono text-zinc-300">
-                    {m.phone || '-'}
-                  </td>
                 </tr>
               ))}
 
               {filteredRoster.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-zinc-500">
+                  <td colSpan={5} className="text-center py-8 text-zinc-500">
                     Nenhum integrante encontrado com os filtros selecionados.
                   </td>
                 </tr>

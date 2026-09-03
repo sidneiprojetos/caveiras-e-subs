@@ -467,25 +467,13 @@ export function printMemberDossier(member: Member): Promise<boolean> {
         <span class="info-label">Nome Civil Completo</span>
         <span class="info-value">${member.name}</span>
       </div>
-      <div class="info-item">
-        <span class="info-label">Telefone / WhatsApp</span>
-        <span class="info-value">${member.phone || 'Não informado'}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Correio Eletrônico (E-mail)</span>
-        <span class="info-value">${member.email || 'Não informado'}</span>
-      </div>
     </div>
 
-    <div class="section-title">3. Histórico de Prazos & Graduações</div>
+    <div class="section-title">3. Histórico de Ingresso</div>
     <div class="info-grid">
       <div class="info-item">
         <span class="info-label">Data de Ingresso no Motoclube</span>
         <span class="info-value">${member.entryDate ? formatDateBR(member.entryDate) : 'Não registrada'}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Data de Graduação no Grupamento</span>
-        <span class="info-value">${member.grupamentoGraduationDate ? formatDateBR(member.grupamentoGraduationDate) : 'Não registrada'}</span>
       </div>
     </div>
 
@@ -543,7 +531,6 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
       <td style="font-weight: 600;">${m.grupamento}</td>
       <td>${m.divisaoName}</td>
       <td style="font-weight: bold; color: ${getStatusStyle(m.status).printColor};">${m.status}</td>
-      <td>${m.phone || '-'}</td>
       <td>${formatDateBR(m.entryDate)}</td>
     </tr>
   `).join('');
@@ -570,7 +557,6 @@ export function printRosterReport(members: Member[], filterTitle = 'Quadro Geral
           <th>Grupamento</th>
           <th>Divisão</th>
           <th>Status</th>
-          <th>Telefone</th>
           <th>Admissão</th>
         </tr>
       </thead>
@@ -648,10 +634,6 @@ export function printIdCards(members: Member[]): Promise<boolean> {
         <div>
           <strong style="color: #64748b; text-transform: uppercase;">Situação:</strong><br>
           <span style="font-weight: 700; color: ${m.status === 'Ativo' ? '#166534' : '#991b1b'};">${m.status}</span>
-        </div>
-        <div>
-          <strong style="color: #64748b; text-transform: uppercase;">Contato:</strong><br>
-          <span style="font-weight: 600;">${m.phone || '-'}</span>
         </div>
       </div>
     </div>

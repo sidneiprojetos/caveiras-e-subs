@@ -61,7 +61,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
     {
       id: 'update',
       name: '3. UPDATE (Atualizar Dados)',
-      description: 'Atualiza o grupamento para Subdiretor / Caveira, telefone e observações.',
+      description: 'Atualiza o grupamento para Subdiretor / Caveira e observações.',
       status: 'idle'
     },
     {
@@ -104,8 +104,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       divisaoName: testDivisao.name,
       grupamento: 'Caveira',
       status: 'Ativo',
-      phone: '(44) 99999-8888',
-      email: 'teste.crud@gestao.com.br',
+      phone: '',
       entryDate: getTodayDateString(),
       grupamentoGraduationDate: getTodayDateString(),
       observations: 'Registro temporário gerado para validação de testes do sistema CRUD.',
@@ -248,7 +247,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       {
         id: 'update',
         name: '3. UPDATE (Atualizar Dados)',
-        description: 'Atualiza o grupamento para Subdiretor / Caveira, telefone e observações.',
+        description: 'Atualiza o grupamento para Subdiretor / Caveira e observações.',
         status: 'idle'
       },
       {
@@ -278,8 +277,7 @@ export const CrudTestModal: React.FC<CrudTestModalProps> = ({
       divisaoName: testDivisao.name,
       grupamento: 'Caveira',
       status: 'Ativo',
-      phone: '(44) 99123-4567',
-      email: 'membro.teste@gestao.com.br',
+      phone: '',
       entryDate: getTodayDateString(),
       observations: 'Criado manualmente pelo painel de Teste de CRUD.',
       createdAt: nowIso,

@@ -201,7 +201,6 @@ export const DigitalIdCardView: React.FC<DigitalIdCardViewProps> = ({
             <div className="mt-3 flex items-center justify-between text-[10px] text-zinc-400 bg-zinc-900/80 px-2.5 py-1.5 rounded-lg border border-zinc-800">
               <div className="flex items-center gap-2 truncate">
                 <span className="truncate">
-                  📞 {member.phone || 'Sem telefone'}
                 </span>
                 <MemberStatusBadge status={member.status} statuses={statuses} size="sm" />
               </div>
