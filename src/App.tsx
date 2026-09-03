@@ -3,7 +3,8 @@ import {
   getStoredMembers, saveStoredMembers, 
   getStoredDivisoes, saveStoredDivisoes, 
   getStoredLogs, addActivityLog,
-  getStoredStatuses, saveStoredStatuses
+  getStoredStatuses, saveStoredStatuses,
+  getStoredGrupamentos, saveStoredGrupamentos
 } from './data/initialData';
 import { 
   subscribeToMembers, 
@@ -20,9 +21,12 @@ import {
   subscribeToStatuses,
   saveStatusToFirestore,
   deleteStatusFromFirestore,
+  subscribeToGrupamentos,
+  saveGrupamentoToFirestore,
+  deleteGrupamentoFromFirestore,
   SUPER_ADMIN_EMAIL
 } from './lib/firebase';
-import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from './types';
+import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, GrupamentoConfig } from './types';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { MemberList } from './components/MemberList';
 import { DivisionManager } from './components/DivisionManager';
@@ -32,6 +36,7 @@ import { AuditLogsView } from './components/AuditLogsView';
 import { MemberModal } from './components/MemberModal';
 import { MemberDetailModal } from './components/MemberDetailModal';
 import { StatusManagerModal } from './components/StatusManagerModal';
+import { GrupamentoManagerModal } from './components/GrupamentoManagerModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { CrudTestModal } from './components/CrudTestModal';
 import { PrintPreviewModal } from './components/PrintPreviewModal';
@@ -44,6 +49,7 @@ export default function App() {
   const [members, setMembers] = useState<Member[]>([]);
   const [divisoes, setDivisoes] = useState<Divisao[]>([]);
   const [statuses, setStatuses] = useState<MemberStatusConfig[]>([]);
+  const [grupamentos, setGrupamentos] = useState<GrupamentoConfig[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [isFirestoreConnected, setIsFirestoreConnected] = useState<boolean>(true);
 
@@ -57,6 +63,7 @@ export default function App() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isCrudTestModalOpen, setIsCrudTestModalOpen] = useState<boolean>(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState<boolean>(false);
+  const [isGrupamentoModalOpen, setIsGrupamentoModalOpen] = useState<boolean>(false);
 
   // Member Modals
   const [isMemberModalOpen, setIsMemberModalOpen] = useState<boolean>(false);
@@ -84,6 +91,7 @@ export default function App() {
     setMembers(loadedMembers);
     setLogs(loadedLogs);
     setStatuses(getStoredStatuses());
+    setGrupamentos(getStoredGrupamentos());
 
     // Subscribe to Firestore in Real Time
     const unsubMembers = subscribeToMembers(
@@ -117,6 +125,16 @@ export default function App() {
       }
     );
 
+    const unsubGrupamentos = subscribeToGrupamentos(
+      (cloudGrupamentos) => {
+        setGrupamentos(cloudGrupamentos);
+        saveStoredGrupamentos(cloudGrupamentos);
+      },
+      (err) => {
+        console.warn('Firestore grupamentos sync warning:', err);
+      }
+    );
+
     const unsubLogs = subscribeToLogs(
       (cloudLogs) => {
         setLogs(cloudLogs);
@@ -140,6 +158,7 @@ export default function App() {
       unsubMembers();
       unsubDivisoes();
       unsubStatuses();
+      unsubGrupamentos();
       unsubLogs();
       unsubAdmins();
     };
@@ -190,6 +209,43 @@ export default function App() {
     } catch (e: any) {
       console.warn('Firestore delete status error, removed from local storage:', e);
       showToast(`Status removido localmente.`);
+    }
+  };
+
+  const handleSaveGrupamento = async (grupamento: GrupamentoConfig) => {
+    const existingIndex = grupamentos.findIndex(g => g.id === grupamento.id || g.name.toLowerCase() === grupamento.name.toLowerCase());
+    const updatedList = existingIndex >= 0
+      ? grupamentos.map((g, index) => index === existingIndex ? grupamento : g)
+      : [...grupamentos, grupamento];
+    setGrupamentos(updatedList);
+    saveStoredGrupamentos(updatedList);
+
+    try {
+      await saveGrupamentoToFirestore(grupamento);
+      showToast(`Grupamento "${grupamento.name}" configurado com sucesso!`);
+    } catch (err) {
+      console.error('Error saving grupamento to Firestore:', err);
+      showToast(`Não foi possível salvar ${grupamento.name} no Firebase.`, 'error');
+    }
+  };
+
+  const handleDeleteGrupamento = async (grupamentoId: string) => {
+    const grupamento = grupamentos.find(g => g.id === grupamentoId);
+    if (!grupamento) return;
+    if (members.some(member => member.grupamento === grupamento.name)) {
+      showToast(`Não é possível excluir ${grupamento.name}: existem integrantes vinculados.`, 'error');
+      return;
+    }
+    const updatedList = grupamentos.filter(g => g.id !== grupamentoId);
+    setGrupamentos(updatedList);
+    saveStoredGrupamentos(updatedList);
+
+    try {
+      await deleteGrupamentoFromFirestore(grupamentoId);
+      showToast(`Grupamento "${grupamento.name}" removido.`);
+    } catch (err) {
+      console.error('Error deleting grupamento from Firestore:', err);
+      showToast(`Não foi possível remover ${grupamento.name} do Firebase.`, 'error');
     }
   };
 
@@ -401,6 +457,8 @@ export default function App() {
             currentDivisionFilter={divisionFilter}
             onDivisionFilterChange={setDivisionFilter}
             statuses={statuses}
+            grupamentos={grupamentos}
+            onOpenGrupamentoManager={() => setIsGrupamentoModalOpen(true)}
             onOpenStatusManager={() => setIsStatusModalOpen(true)}
           />
         )}
@@ -464,8 +522,11 @@ export default function App() {
         memberToEdit={memberToEdit}
         divisoes={divisoes}
         statuses={statuses}
+        grupamentos={grupamentos}
+        onOpenGrupamentoManager={() => setIsGrupamentoModalOpen(true)}
         onOpenStatusManager={() => setIsStatusModalOpen(true)}
         onSaveStatus={handleSaveStatus}
+        onSaveGrupamento={handleSaveGrupamento}
       />
 
       <MemberDetailModal
@@ -493,6 +554,17 @@ export default function App() {
         onSaveStatus={handleSaveStatus}
         onDeleteStatus={handleDeleteStatus}
         members={members}
+        isAdmin={isAdmin}
+        onRequireAdmin={() => setIsAdminModalOpen(true)}
+      />
+
+      <GrupamentoManagerModal
+        isOpen={isGrupamentoModalOpen}
+        onClose={() => setIsGrupamentoModalOpen(false)}
+        grupamentos={grupamentos}
+        members={members}
+        onSaveGrupamento={handleSaveGrupamento}
+        onDeleteGrupamento={handleDeleteGrupamento}
         isAdmin={isAdmin}
         onRequireAdmin={() => setIsAdminModalOpen(true)}
       />
