@@ -40,9 +40,44 @@ const DEFAULT_GEMINI_PROJECT = {
   environment: process.env.NODE_ENV || "development",
 };
 
+// Resilient Gemini generator with automatic fallback on transient 503/429
+async function generateWithFallback(contents: any): Promise<{ text: string; modelUsed: string }> {
+  const ai = getGeminiClient();
+  const candidateModels = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
+  let lastError: any = null;
+
+  for (const model of candidateModels) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents,
+      });
+      return { text: response.text || "", modelUsed: model };
+    } catch (err: any) {
+      lastError = err;
+      const msg = String(err?.message || "");
+      if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("high demand") || msg.includes("429")) {
+        console.warn(`Model ${model} temporarily unavailable, attempting fallback to next model...`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError;
+}
+
 // -------------------------------------------------------------
 // API ROUTES
 // -------------------------------------------------------------
+
+// General health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "gestao-sidnei-api",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Health & Gemini Project Config Status
 app.get("/api/gemini/config", (req, res) => {
@@ -99,15 +134,12 @@ Adote um tom sóbrio, firme, disciplinado e fraternal característico do motocic
 Formate a resposta em Markdown claro e direto.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: prompt,
-    });
+    const response = await generateWithFallback(prompt);
 
     res.json({
       success: true,
       analysis: response.text,
-      modelUsed: "gemini-3.8-flash",
+      modelUsed: response.modelUsed,
       generatedAt: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -149,15 +181,12 @@ Estrutura desejada:
 Formate em Markdown pronto para impressão ou compartilhamento oficial.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: prompt,
-    });
+    const response = await generateWithFallback(prompt);
 
     res.json({
       success: true,
       comunicado: response.text,
-      modelUsed: "gemini-3.8-flash",
+      modelUsed: response.modelUsed,
       generatedAt: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -200,15 +229,14 @@ Seja objetivo, prestativo, profissional e com linguagem respeitosa própria do u
       },
     ];
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: `${systemContext}\n\nPergunta do Administrador: ${message}`,
-    });
+    const response = await generateWithFallback(
+      `${systemContext}\n\nPergunta do Administrador: ${message}`
+    );
 
     res.json({
       success: true,
       reply: response.text,
-      modelUsed: "gemini-3.8-flash",
+      modelUsed: response.modelUsed,
     });
   } catch (error: any) {
     console.error("Gemini chat error:", error);
