@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Search, Filter, Plus, LayoutGrid, List, Phone, MapPin, 
-  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer, Tag
+  Calendar, Edit3, Trash2, Eye, Shield, Skull, ArrowUpDown, Printer, Tag, Award
 } from 'lucide-react';
-import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
+import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { MemberStatusBadge } from './MemberStatusBadge';
 import { ConfirmDeleteModal, DeleteTargetInfo } from './ConfirmDeleteModal';
@@ -23,6 +23,8 @@ interface MemberListProps {
   onDivisionFilterChange: (divId: string) => void;
   statuses?: MemberStatusConfig[];
   onOpenStatusManager?: () => void;
+  grupamentos?: GrupamentoConfig[];
+  onOpenGrupamentoManager?: () => void;
 }
 
 export const MemberList: React.FC<MemberListProps> = ({
@@ -37,7 +39,9 @@ export const MemberList: React.FC<MemberListProps> = ({
   currentDivisionFilter,
   onDivisionFilterChange,
   statuses,
-  onOpenStatusManager
+  onOpenStatusManager,
+  grupamentos,
+  onOpenGrupamentoManager
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
@@ -45,6 +49,7 @@ export const MemberList: React.FC<MemberListProps> = ({
   const [statusFilter, setStatusFilter] = useState('all');
 
   const availableStatuses = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
+  const availableGrupamentos = grupamentos && grupamentos.length > 0 ? grupamentos : DEFAULT_GRUPAMENTOS;
   const [sortBy, setSortBy] = useState<'vulgo' | 'name' | 'entryDate' | 'divisaoName'>('vulgo');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
@@ -199,6 +204,17 @@ export const MemberList: React.FC<MemberListProps> = ({
             </button>
           </div>
 
+          {onOpenGrupamentoManager && (
+            <button
+              onClick={onOpenGrupamentoManager}
+              className="px-3.5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 hover:border-red-500/50 font-bold rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2"
+              title="Gerenciar e cadastrar novos grupamentos e patentes"
+            >
+              <Award size={15} className="text-red-400" />
+              <span>Grupamentos ({availableGrupamentos.length})</span>
+            </button>
+          )}
+
           {onOpenStatusManager && (
             <button
               onClick={onOpenStatusManager}
@@ -250,9 +266,9 @@ export const MemberList: React.FC<MemberListProps> = ({
             onChange={(e) => setGrupamentoFilter(e.target.value)}
             className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
           >
-            <option value="all" className="bg-[#12151c]">Todos os Grupamentos</option>
-            {DEFAULT_GRUPAMENTOS.map((g) => (
-              <option key={g.name} value={g.name} className="bg-[#12151c]">{g.name}</option>
+            <option value="all" className="bg-[#12151c]">Todos os Grupamentos ({availableGrupamentos.length})</option>
+            {availableGrupamentos.map((g) => (
+              <option key={g.id || g.name} value={g.name} className="bg-[#12151c]">{g.name}</option>
             ))}
           </select>
         </div>
@@ -359,7 +375,11 @@ export const MemberList: React.FC<MemberListProps> = ({
                     <p className="text-xs text-zinc-400 truncate">{member.name}</p>
 
                     <div className="pt-1.5">
-                      <GrupamentoBadge grupamento={member.grupamento} size="sm" />
+                      <GrupamentoBadge 
+                        grupamento={member.grupamento} 
+                        grupamentos={availableGrupamentos}
+                        size="sm" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -495,7 +515,11 @@ export const MemberList: React.FC<MemberListProps> = ({
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <GrupamentoBadge grupamento={m.grupamento} size="sm" />
+                      <GrupamentoBadge 
+                        grupamento={m.grupamento} 
+                        grupamentos={availableGrupamentos}
+                        size="sm" 
+                      />
                     </td>
                     <td className="py-3 px-4 text-zinc-200 font-medium">
                       {m.divisaoName}

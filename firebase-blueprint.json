@@ -85,6 +85,24 @@
         { "name": "active", "type": "boolean", "description": "Se o status está ativo para seleção" },
         { "name": "createdAt", "type": "string", "description": "Timestamp de criação" }
       ]
+    },
+    {
+      "name": "Grupamento",
+      "description": "Patentes, grupamentos e graduações operacionais do moto clube (Caveira, Subdiretor, Batedor, etc.)",
+      "collection": "grupamentos",
+      "fields": [
+        { "name": "id", "type": "string", "description": "Identificador único do grupamento" },
+        { "name": "name", "type": "string", "description": "Nome do grupamento ou patente" },
+        { "name": "description", "type": "string", "description": "Descrição das atribuições operacionais" },
+        { "name": "colorTheme", "type": "string", "description": "Tonalidade do badge (red, amber, blue, purple, etc.)" },
+        { "name": "iconType", "type": "string", "description": "Ícone do símbolo oficial (skull, shield, star, crosshair, zap, flame, flag, award)" },
+        { "name": "badgeBg", "type": "string", "description": "Classes CSS de fundo e borda do badge" },
+        { "name": "borderColor", "type": "string", "description": "Classe CSS da cor de destaque da borda" },
+        { "name": "color", "type": "string", "description": "Classe CSS da cor do texto" },
+        { "name": "isDefault", "type": "boolean", "description": "Se é um grupamento padrão histórico do sistema" },
+        { "name": "active", "type": "boolean", "description": "Se está ativo para seleção no efetivo" },
+        { "name": "createdAt", "type": "string", "description": "Timestamp de criação" }
+      ]
     }
   ],
   "securityRules": {

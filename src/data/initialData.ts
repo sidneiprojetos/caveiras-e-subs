@@ -1,4 +1,4 @@
-import { Divisao, Member, ActivityLog, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
+import { Divisao, Member, ActivityLog, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig, DEFAULT_GRUPAMENTOS } from '../types';
 
 export const INITIAL_DIVISOES: Divisao[] = [
   {
@@ -270,6 +270,29 @@ const STORAGE_KEYS = {
   ADMIN_PIN: 'insanos_mc_admin_pin_v1',
   ADMIN_SESSION: 'insanos_mc_admin_session_v1',
   STATUSES: 'insanos_mc_statuses_v1',
+  GRUPAMENTOS: 'insanos_mc_grupamentos_v1',
+};
+
+export const getStoredGrupamentos = (): GrupamentoConfig[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.GRUPAMENTOS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error loading grupamentos from localStorage', e);
+  }
+  saveStoredGrupamentos(DEFAULT_GRUPAMENTOS);
+  return DEFAULT_GRUPAMENTOS;
+};
+
+export const saveStoredGrupamentos = (grupamentos: GrupamentoConfig[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.GRUPAMENTOS, JSON.stringify(grupamentos));
+  } catch (e) {
+    console.error('Error saving grupamentos', e);
+  }
 };
 
 export const getStoredStatuses = (): MemberStatusConfig[] => {

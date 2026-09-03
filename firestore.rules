@@ -25,6 +25,10 @@ service cloud.firestore {
     match /statuses/{statusId} {
       allow read, write: if true;
     }
+    // Grupamentos and ranks management
+    match /grupamentos/{grupamentoId} {
+      allow read, write: if true;
+    }
     // Catch-all
     match /{document=**} {
       allow read, write: if true;

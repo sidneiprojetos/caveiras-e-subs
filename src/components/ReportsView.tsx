@@ -6,7 +6,7 @@ import {
   Printer, Download, FileSpreadsheet, Shield, Skull, Crosshair, Star, 
   Users, MapPin, Filter, Upload, CheckCircle2, Tag
 } from 'lucide-react';
-import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
+import { Member, Divisao, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { MemberStatusBadge } from './MemberStatusBadge';
 import { printRosterReport } from '../utils/printService';
@@ -17,13 +17,15 @@ interface ReportsViewProps {
   divisoes: Divisao[];
   onImportBackup: (importedMembers: Member[], importedDivisoes: Divisao[]) => void;
   statuses?: MemberStatusConfig[];
+  grupamentos?: GrupamentoConfig[];
 }
 
 export const ReportsView: React.FC<ReportsViewProps> = ({
   members,
   divisoes,
   onImportBackup,
-  statuses
+  statuses,
+  grupamentos
 }) => {
   const [filterDivisao, setFilterDivisao] = useState<string>('all');
   const [filterGrupamento, setFilterGrupamento] = useState<string>('all');
@@ -31,21 +33,37 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   const [importStatus, setImportStatus] = useState<string>('');
 
   const availableStatuses = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
+  const availableGrupamentos = grupamentos && grupamentos.length > 0 ? grupamentos : DEFAULT_GRUPAMENTOS;
 
   // Calculations for KPI
   const totalMembers = members.length;
-  const caveiras = members.filter(m => m.grupamento === 'Caveira').length;
-  const subdiretores = members.filter(m => m.grupamento === 'Subdiretor').length;
-  const operacionais = members.filter(m => m.grupamento === 'Operacional Regional').length;
-  const subdiretoresCaveiras = members.filter(m => m.grupamento === 'Subdiretor / Caveira').length;
+  const caveiras = members.filter(m => m.grupamento.toLowerCase() === 'caveira').length;
+  const subdiretores = members.filter(m => m.grupamento.toLowerCase().includes('subdiretor')).length;
   const ativos = members.filter(m => m.status === 'Ativo').length;
 
-  const grupamentoData = [
-    { name: 'Caveira', value: caveiras, fill: '#ef4444' },
-    { name: 'Subdiretor', value: subdiretores, fill: '#f59e0b' },
-    { name: 'Operacional Reg.', value: operacionais, fill: '#3b82f6' },
-    { name: 'Subdiretor/Caveira', value: subdiretoresCaveiras, fill: '#a855f7' },
-  ].filter(d => d.value > 0);
+  const THEME_COLORS: Record<string, string> = {
+    red: '#ef4444',
+    amber: '#f59e0b',
+    blue: '#3b82f6',
+    purple: '#a855f7',
+    emerald: '#10b981',
+    zinc: '#71717a',
+    cyan: '#06b6d4',
+    rose: '#f43f5e'
+  };
+
+  const grupamentoData = availableGrupamentos.map((g, idx) => {
+    const count = members.filter(
+      m => m.grupamento.trim().toLowerCase() === g.name.trim().toLowerCase()
+    ).length;
+    const fallbackColor = Object.values(THEME_COLORS)[idx % Object.values(THEME_COLORS).length];
+    const fill = g.colorTheme && THEME_COLORS[g.colorTheme] ? THEME_COLORS[g.colorTheme] : fallbackColor;
+    return {
+      name: g.name,
+      value: count,
+      fill
+    };
+  }).filter(d => d.value > 0);
 
   // Divisões Chart Data
   const divisaoData = divisoes.map(d => {
@@ -439,9 +457,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             onChange={(e) => setFilterGrupamento(e.target.value)}
             className="bg-[#181c24] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
           >
-            <option value="all">Todos os Grupamentos</option>
-            {DEFAULT_GRUPAMENTOS.map((g) => (
-              <option key={g.name} value={g.name}>{g.name}</option>
+            <option value="all">Todos os Grupamentos ({availableGrupamentos.length})</option>
+            {availableGrupamentos.map((g) => (
+              <option key={g.id || g.name} value={g.name}>{g.name}</option>
             ))}
           </select>
 
@@ -503,7 +521,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                     <span className="text-[11px] text-zinc-400">{m.name}</span>
                   </td>
                   <td className="py-2.5 px-3">
-                    <GrupamentoBadge grupamento={m.grupamento} size="sm" />
+                    <GrupamentoBadge 
+                      grupamento={m.grupamento} 
+                      grupamentos={availableGrupamentos}
+                      size="sm" 
+                    />
                   </td>
                   <td className="py-2.5 px-3 text-zinc-300 font-medium">
                     {m.divisaoName}

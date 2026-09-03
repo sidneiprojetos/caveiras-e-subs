@@ -13,8 +13,8 @@ import {
   orderBy
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES } from '../types';
-import { INITIAL_MEMBERS, INITIAL_DIVISOES, INITIAL_LOGS, getStoredStatuses } from '../data/initialData';
+import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig, DEFAULT_GRUPAMENTOS } from '../types';
+import { INITIAL_MEMBERS, INITIAL_DIVISOES, INITIAL_LOGS, getStoredStatuses, getStoredGrupamentos } from '../data/initialData';
 
 // Initialize Firebase App singleton
 const app = getApps().length > 0 ? getApp() : initializeApp({
@@ -61,7 +61,8 @@ const COLLECTIONS = {
   LOGS: 'logs',
   SETTINGS: 'settings',
   ADMINS: 'admins',
-  STATUSES: 'statuses'
+  STATUSES: 'statuses',
+  GRUPAMENTOS: 'grupamentos'
 };
 
 /**
@@ -416,4 +417,66 @@ export const deleteStatusFromFirestore = async (statusId: string): Promise<void>
   const docRef = doc(db, COLLECTIONS.STATUSES, statusId);
   await deleteDoc(docRef);
 };
+
+/**
+ * Real-time subscription to Grupamentos with auto-seed if cloud collection is empty
+ */
+export const subscribeToGrupamentos = (
+  callback: (grupamentos: GrupamentoConfig[]) => void,
+  onError?: (error: any) => void
+) => {
+  const colRef = collection(db, COLLECTIONS.GRUPAMENTOS);
+
+  return onSnapshot(colRef, async (snapshot) => {
+    if (snapshot.empty) {
+      let initialData = getStoredGrupamentos();
+      try {
+        const batch = writeBatch(db);
+        initialData.forEach((gr) => {
+          const docRef = doc(db, COLLECTIONS.GRUPAMENTOS, gr.id);
+          batch.set(docRef, gr);
+        });
+        await batch.commit();
+      } catch (seedErr) {
+        console.error('Error seeding initial grupamentos to Firestore:', seedErr);
+      }
+      callback(initialData);
+    } else {
+      const items: GrupamentoConfig[] = [];
+      snapshot.forEach((d) => {
+        items.push(d.data() as GrupamentoConfig);
+      });
+      // Sort: defaults first, then custom alphabetically
+      items.sort((a, b) => {
+        if (a.isDefault && !b.isDefault) return -1;
+        if (!a.isDefault && b.isDefault) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      callback(items);
+      try {
+        localStorage.setItem('insanos_mc_grupamentos_v1', JSON.stringify(items));
+      } catch (e) {}
+    }
+  }, (err) => {
+    console.error('Firestore grupamentos subscription error:', err);
+    if (onError) onError(err);
+  });
+};
+
+/**
+ * Save or update Grupamento in Firestore
+ */
+export const saveGrupamentoToFirestore = async (grupamento: GrupamentoConfig): Promise<void> => {
+  const docRef = doc(db, COLLECTIONS.GRUPAMENTOS, grupamento.id);
+  await setDoc(docRef, grupamento, { merge: true });
+};
+
+/**
+ * Delete Grupamento from Firestore
+ */
+export const deleteGrupamentoFromFirestore = async (grupamentoId: string): Promise<void> => {
+  const docRef = doc(db, COLLECTIONS.GRUPAMENTOS, grupamentoId);
+  await deleteDoc(docRef);
+};
+
 

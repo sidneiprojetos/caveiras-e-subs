@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Member, Divisao, MemberStatus, DEFAULT_GRUPAMENTOS, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, StatusColor } from '../types';
+import { 
+  Member, Divisao, MemberStatus, DEFAULT_GRUPAMENTOS, 
+  MemberStatusConfig, DEFAULT_MEMBER_STATUSES, StatusColor,
+  GrupamentoConfig, GrupamentoColorTheme, GrupamentoIconType
+} from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { MemberStatusBadge } from './MemberStatusBadge';
 import { STATUS_COLOR_OPTIONS } from '../utils/statusUtils';
+import { GRUPAMENTO_THEME_OPTIONS, GRUPAMENTO_ICON_OPTIONS } from '../utils/grupamentoUtils';
 import { getTodayDateString } from '../utils/dateUtils';
 import { 
   X as CloseIcon, 
@@ -14,7 +19,9 @@ import {
   ArrowLeft,
   Plus,
   Tag,
-  Settings2
+  Settings2,
+  Award,
+  Sparkles
 } from 'lucide-react';
 
 interface MemberModalProps {
@@ -26,6 +33,9 @@ interface MemberModalProps {
   statuses?: MemberStatusConfig[];
   onOpenStatusManager?: () => void;
   onSaveStatus?: (status: MemberStatusConfig) => Promise<void> | void;
+  grupamentos?: GrupamentoConfig[];
+  onOpenGrupamentoManager?: () => void;
+  onSaveGrupamento?: (grupamento: GrupamentoConfig) => Promise<void> | void;
 }
 
 export const MemberModal: React.FC<MemberModalProps> = ({
@@ -36,7 +46,10 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   divisoes,
   statuses,
   onOpenStatusManager,
-  onSaveStatus
+  onSaveStatus,
+  grupamentos,
+  onOpenGrupamentoManager,
+  onSaveGrupamento
 }) => {
   const [activeTab, setActiveTab] = useState<'geral' | 'grupamento'>('geral');
   
@@ -61,16 +74,31 @@ export const MemberModal: React.FC<MemberModalProps> = ({
   const [quickStatusError, setQuickStatusError] = useState('');
   const [isSavingQuickStatus, setIsSavingQuickStatus] = useState(false);
 
+  // Quick Inline Grupamento Creator state
+  const [showQuickGrupamentoForm, setShowQuickGrupamentoForm] = useState(false);
+  const [quickGrupamentoName, setQuickGrupamentoName] = useState('');
+  const [quickGrupamentoDesc, setQuickGrupamentoDesc] = useState('');
+  const [quickGrupamentoTheme, setQuickGrupamentoTheme] = useState<GrupamentoColorTheme>('red');
+  const [quickGrupamentoIcon, setQuickGrupamentoIcon] = useState<GrupamentoIconType>('shield');
+  const [quickGrupamentoError, setQuickGrupamentoError] = useState('');
+  const [isSavingQuickGrupamento, setIsSavingQuickGrupamento] = useState(false);
+
   const activeStatusesList = statuses && statuses.length > 0 ? statuses : DEFAULT_MEMBER_STATUSES;
+  const availableGrupamentos = grupamentos && grupamentos.length > 0 ? grupamentos : DEFAULT_GRUPAMENTOS;
 
   useEffect(() => {
     if (memberToEdit) {
       setName(memberToEdit.name || '');
       setVulgo(memberToEdit.vulgo || '');
       
-      const isPredefined = DEFAULT_GRUPAMENTOS.some(g => g.name === memberToEdit.grupamento);
-      if (isPredefined) {
-        setGrupamento(memberToEdit.grupamento);
+      const isKnown = availableGrupamentos.some(
+        g => g.name.toLowerCase() === memberToEdit.grupamento.toLowerCase()
+      );
+      if (isKnown) {
+        const matched = availableGrupamentos.find(
+          g => g.name.toLowerCase() === memberToEdit.grupamento.toLowerCase()
+        );
+        setGrupamento(matched ? matched.name : memberToEdit.grupamento);
         setCustomGrupamento('');
       } else {
         setGrupamento('Outro');
@@ -88,7 +116,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
       // Defaults for new member
       setName('');
       setVulgo('');
-      setGrupamento('Caveira');
+      setGrupamento(availableGrupamentos[0]?.name || 'Caveira');
       setCustomGrupamento('');
       setDivisaoId(divisoes[0]?.id || '');
       setStatus('Ativo');
@@ -100,6 +128,8 @@ export const MemberModal: React.FC<MemberModalProps> = ({
     }
     setFormError('');
     setActiveTab('geral');
+    setShowQuickStatusForm(false);
+    setShowQuickGrupamentoForm(false);
   }, [memberToEdit, isOpen, divisoes]);
 
   if (!isOpen) return null;
@@ -465,32 +495,231 @@ export const MemberModal: React.FC<MemberModalProps> = ({
           {activeTab === 'grupamento' && (
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">
-                  Grupamento Oficial do Integrante <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {DEFAULT_GRUPAMENTOS.map((g) => {
-                    const isSelected = grupamento === g.name;
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-zinc-300">
+                    Grupamento Oficial do Integrante <span className="text-red-500">*</span>
+                  </label>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowQuickGrupamentoForm(!showQuickGrupamentoForm);
+                        setQuickGrupamentoError('');
+                      }}
+                      className="text-[11px] font-bold text-red-400 hover:text-red-300 flex items-center gap-1 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 px-2 py-0.5 rounded transition"
+                    >
+                      <Plus size={12} />
+                      <span>{showQuickGrupamentoForm ? 'Fechar Cadastro' : '+ Novo Grupamento'}</span>
+                    </button>
+
+                    {onOpenGrupamentoManager && (
+                      <button
+                        type="button"
+                        onClick={onOpenGrupamentoManager}
+                        className="text-[11px] font-semibold text-zinc-400 hover:text-white flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 px-2 py-0.5 rounded transition"
+                        title="Gerenciar todos os grupamentos e patentes"
+                      >
+                        <Settings2 size={12} />
+                        <span>Gerenciar Patentes</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* QUICK INLINE GRUPAMENTO CREATOR */}
+                {showQuickGrupamentoForm && (
+                  <div className="mb-3.5 p-3.5 bg-[#121620] border border-red-500/50 rounded-xl space-y-3 animate-fade-in shadow-lg">
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+                      <div className="flex items-center gap-1.5 text-red-400">
+                        <Sparkles size={14} />
+                        <span className="text-xs font-bold text-white">Cadastrar Novo Grupamento / Patente</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickGrupamentoForm(false)}
+                        className="text-zinc-500 hover:text-zinc-300"
+                      >
+                        <CloseIcon size={14} />
+                      </button>
+                    </div>
+
+                    {quickGrupamentoError && (
+                      <div className="text-[11px] text-red-400 bg-red-950/80 border border-red-800 p-2 rounded">
+                        {quickGrupamentoError}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="text-[10px] text-zinc-400 block mb-1">Nome do Grupamento *</label>
+                        <input
+                          type="text"
+                          value={quickGrupamentoName}
+                          onChange={(e) => setQuickGrupamentoName(e.target.value)}
+                          placeholder="Ex: Batedor, Guarda de Honra, Disciplina..."
+                          className="w-full bg-[#0a0c10] border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
+                          autoFocus
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-zinc-400 block mb-1">Descrição Operacional</label>
+                        <input
+                          type="text"
+                          value={quickGrupamentoDesc}
+                          onChange={(e) => setQuickGrupamentoDesc(e.target.value)}
+                          placeholder="Ex: Responsável pela abertura de comboio"
+                          className="w-full bg-[#0a0c10] border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Símbolo / Ícone */}
+                    <div>
+                      <span className="text-[10px] text-zinc-400 block mb-1">Símbolo Oficial:</span>
+                      <div className="grid grid-cols-4 sm:grid-cols-8 gap-1">
+                        {GRUPAMENTO_ICON_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.type}
+                            type="button"
+                            onClick={() => setQuickGrupamentoIcon(opt.type)}
+                            className={`p-1.5 rounded border text-center transition flex flex-col items-center justify-center gap-0.5 ${
+                              quickGrupamentoIcon === opt.type
+                                ? 'border-red-500 bg-red-950/40 text-red-400 ring-1 ring-red-500'
+                                : 'border-zinc-800 bg-[#0a0c10] text-zinc-400 hover:text-zinc-200'
+                            }`}
+                            title={opt.label}
+                          >
+                            <span className="text-[10px] font-bold capitalize">{opt.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Cor do Tema */}
+                    <div>
+                      <span className="text-[10px] text-zinc-400 block mb-1">Tonalidade do Badge:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {GRUPAMENTO_THEME_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.theme}
+                            type="button"
+                            onClick={() => setQuickGrupamentoTheme(opt.theme)}
+                            className={`px-2 py-1 rounded text-[10px] font-medium border flex items-center gap-1.5 transition ${
+                              quickGrupamentoTheme === opt.theme
+                                ? 'border-red-500 bg-zinc-800 text-white ring-1 ring-red-500'
+                                : 'border-zinc-800 bg-[#0a0c10] text-zinc-400 hover:text-zinc-200'
+                            }`}
+                          >
+                            <div className={`w-2.5 h-2.5 rounded-full ${opt.previewClass}`} />
+                            <span>{opt.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-1 border-t border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickGrupamentoForm(false)}
+                        className="px-2.5 py-1 rounded text-xs text-zinc-400 hover:text-white"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSavingQuickGrupamento}
+                        onClick={async () => {
+                          const trimmed = quickGrupamentoName.trim();
+                          if (!trimmed) {
+                            setQuickGrupamentoError('Informe o nome do grupamento.');
+                            return;
+                          }
+                          const duplicate = availableGrupamentos.some(
+                            g => g.name.toLowerCase() === trimmed.toLowerCase()
+                          );
+                          if (duplicate) {
+                            setQuickGrupamentoError(`O grupamento "${trimmed}" já está cadastrado.`);
+                            return;
+                          }
+                          setIsSavingQuickGrupamento(true);
+                          try {
+                            const selectedTheme = GRUPAMENTO_THEME_OPTIONS.find(t => t.theme === quickGrupamentoTheme) || GRUPAMENTO_THEME_OPTIONS[0];
+                            const newGrupConfig: GrupamentoConfig = {
+                              id: `grup-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                              name: trimmed,
+                              description: quickGrupamentoDesc.trim() || undefined,
+                              colorTheme: quickGrupamentoTheme,
+                              iconType: quickGrupamentoIcon,
+                              badgeBg: selectedTheme.badgeBg,
+                              borderColor: selectedTheme.borderColor,
+                              color: selectedTheme.textColor,
+                              isDefault: false,
+                              active: true,
+                              createdAt: new Date().toISOString()
+                            };
+
+                            if (onSaveGrupamento) {
+                              await onSaveGrupamento(newGrupConfig);
+                            }
+
+                            setGrupamento(trimmed);
+                            setCustomGrupamento('');
+                            setQuickGrupamentoName('');
+                            setQuickGrupamentoDesc('');
+                            setShowQuickGrupamentoForm(false);
+                          } catch (err: any) {
+                            setQuickGrupamentoError(err?.message || 'Erro ao cadastrar grupamento.');
+                          } finally {
+                            setIsSavingQuickGrupamento(false);
+                          }
+                        }}
+                        className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded shadow transition flex items-center gap-1.5"
+                      >
+                        <CheckIcon size={12} />
+                        <span>{isSavingQuickGrupamento ? 'Cadastrando...' : 'Salvar e Vincular'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* GRUPAMENTOS GRID */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
+                  {availableGrupamentos.map((g) => {
+                    const isSelected = grupamento.toLowerCase() === g.name.toLowerCase();
                     return (
                       <button
-                        key={g.name}
+                        key={g.id || g.name}
                         type="button"
                         onClick={() => {
                           setGrupamento(g.name);
                           if (formError) setFormError('');
                         }}
-                        className={`p-3.5 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${
+                        className={`p-3 rounded-xl border text-left transition flex items-start gap-3 cursor-pointer ${
                           isSelected
-                            ? `${g.badgeBg} ${g.borderColor} border-2 shadow-lg scale-[1.01]`
+                            ? `${g.badgeBg || 'bg-red-950/40 border-red-700 text-red-200'} border-2 shadow-lg scale-[1.01]`
                             : 'bg-[#0c0e12] border-zinc-800 hover:border-zinc-700 text-zinc-300'
                         }`}
                       >
                         <div className="pt-0.5">
-                          <GrupamentoBadge grupamento={g.name} size="sm" />
+                          <GrupamentoBadge 
+                            grupamento={g.name} 
+                            grupamentos={availableGrupamentos}
+                            size="sm" 
+                          />
                         </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-white mb-0.5">{g.name}</p>
-                          <p className="text-[11px] text-zinc-400 leading-tight">{g.description}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-white truncate">{g.name}</p>
+                            {g.isDefault && (
+                              <span className="text-[9px] text-zinc-500 bg-zinc-800/80 px-1 py-0.2 rounded">
+                                Padrão
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-zinc-400 line-clamp-2 mt-0.5 leading-tight">
+                            {g.description || 'Grupamento operacional'}
+                          </p>
                         </div>
                       </button>
                     );
@@ -505,7 +734,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({
                       onChange={() => setGrupamento('Outro')}
                       className="accent-red-500"
                     />
-                    <span>Outro Grupamento / Posição Personalizada</span>
+                    <span>Outro Grupamento / Posição Personalizada Manual</span>
                   </label>
                   {grupamento === 'Outro' && (
                     <input

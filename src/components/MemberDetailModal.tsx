@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { X, Phone, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Mail } from 'lucide-react';
-import { Member, MemberStatusConfig } from '../types';
+import { X, Phone, Calendar, Shield, Skull, MapPin, Edit3, Trash2, Printer, Award, Mail, Star, Crosshair, Zap, Flame, Flag } from 'lucide-react';
+import { Member, MemberStatusConfig, GrupamentoConfig } from '../types';
 import { GrupamentoBadge } from './GrupamentoBadge';
 import { MemberStatusBadge } from './MemberStatusBadge';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { printMemberDossier } from '../utils/printService';
 import { formatDateBR, calculateYearsInClub } from '../utils/dateUtils';
+import { getGrupamentoConfig } from '../utils/grupamentoUtils';
 
 interface MemberDetailModalProps {
   member: Member | null;
@@ -16,6 +17,7 @@ interface MemberDetailModalProps {
   isAdmin: boolean;
   onRequireAdmin?: () => void;
   statuses?: MemberStatusConfig[];
+  grupamentos?: GrupamentoConfig[];
 }
 
 export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
@@ -26,11 +28,35 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   onDelete,
   isAdmin,
   onRequireAdmin,
-  statuses
+  statuses,
+  grupamentos
 }) => {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   if (!isOpen || !member) return null;
+
+  const grupConfig = getGrupamentoConfig(member.grupamento, grupamentos);
+
+  const renderBigIcon = () => {
+    switch (grupConfig.iconType) {
+      case 'skull':
+        return <Skull size={40} className="text-red-500" />;
+      case 'shield':
+        return <Shield size={40} className="text-amber-500" />;
+      case 'star':
+        return <Star size={40} className="text-purple-400 fill-purple-400/20" />;
+      case 'crosshair':
+        return <Crosshair size={40} className="text-blue-500" />;
+      case 'zap':
+        return <Zap size={40} className="text-amber-400" />;
+      case 'flame':
+        return <Flame size={40} className="text-orange-400" />;
+      case 'flag':
+        return <Flag size={40} className="text-emerald-400" />;
+      default:
+        return <Award size={40} className="text-zinc-400" />;
+    }
+  };
 
   const handlePrint = () => {
     printMemberDossier(member);
@@ -123,13 +149,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 pb-6 border-b border-zinc-800">
             <div className="relative shrink-0">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1c2230] via-[#121620] to-[#0a0c10] border-2 border-red-600 shadow-xl flex flex-col items-center justify-center p-2 text-center">
-                {member.grupamento === 'Caveira' && <Skull size={40} className="text-red-500" />}
-                {member.grupamento === 'Subdiretor' && <Shield size={40} className="text-amber-500" />}
-                {member.grupamento === 'Operacional Regional' && <Shield size={40} className="text-blue-500" />}
-                {member.grupamento === 'Subdiretor / Caveira' && <Skull size={40} className="text-purple-400" />}
-                {member.grupamento !== 'Caveira' && member.grupamento !== 'Subdiretor' && member.grupamento !== 'Operacional Regional' && member.grupamento !== 'Subdiretor / Caveira' && (
-                  <Shield size={40} className="text-zinc-400" />
-                )}
+                {renderBigIcon()}
               </div>
               <div className="absolute -bottom-2.5 -right-2 shadow-lg">
                 <MemberStatusBadge status={member.status} statuses={statuses} size="sm" />
@@ -146,7 +166,11 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                 </div>
 
                 <div className="flex sm:flex-col items-center sm:items-end gap-1.5 justify-center">
-                  <GrupamentoBadge grupamento={member.grupamento} size="md" />
+                  <GrupamentoBadge 
+                    grupamento={member.grupamento} 
+                    grupamentos={grupamentos}
+                    size="md" 
+                  />
                 </div>
               </div>
 
