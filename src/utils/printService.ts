@@ -461,7 +461,7 @@ export function printMemberDossier(member: Member): Promise<boolean> {
     <div class="info-grid">
       <div class="info-item">
         <span class="info-label">Nome de Colete</span>
-        <span class="info-value" style="font-weight: 800; color: #991b1b;">${member.vulgo}</span>
+        <span class="info-value" style="font-weight: 800; color: #991b1b;">${member.coleteNumber ? `#${member.coleteNumber} ` : ''}${member.vulgo}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Nome Civil Completo</span>

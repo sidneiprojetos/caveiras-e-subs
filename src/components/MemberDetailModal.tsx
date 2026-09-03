@@ -155,6 +155,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h1 className="text-2xl font-black text-white font-cinzel tracking-wide">
+                    {member.coleteNumber && <span className="text-red-400 mr-2">#{member.coleteNumber}</span>}
                     {member.vulgo}
                   </h1>
                   <p className="text-sm text-zinc-300 font-medium">{member.name}</p>

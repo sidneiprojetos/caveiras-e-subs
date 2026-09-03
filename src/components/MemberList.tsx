@@ -490,6 +490,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                         </div>
                         <div>
                           <strong className="text-white block font-semibold group-hover:text-red-400 transition font-cinzel">
+                            {m.coleteNumber && <span className="text-red-400 mr-1">#{m.coleteNumber}</span>}
                             {m.vulgo}
                           </strong>
                           <span className="text-[11px] text-zinc-400 block">{m.name}</span>
