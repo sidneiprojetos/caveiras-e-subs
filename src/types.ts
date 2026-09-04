@@ -169,6 +169,7 @@ export interface AgendaEvent {
   location?: string;
   divisaoId?: string;
   description?: string;
+  acontecimentos?: string;
   createdAt: string;
 }
 

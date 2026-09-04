@@ -35,7 +35,6 @@ import { Navbar, ActiveTab } from './components/Navbar';
 import { MemberList } from './components/MemberList';
 import { DivisionManager } from './components/DivisionManager';
 import { ReportsView } from './components/ReportsView';
-import { DigitalIdCardView } from './components/DigitalIdCardView';
 import { AuditLogsView } from './components/AuditLogsView';
 import { MemberModal } from './components/MemberModal';
 import { MemberDetailModal } from './components/MemberDetailModal';
@@ -540,14 +539,6 @@ export default function App() {
             onRequireAdmin={() => setIsAdminModalOpen(true)}
             onSaveEvent={handleSaveAgendaEvent}
             onDeleteEvent={handleDeleteAgendaEvent}
-          />
-        )}
-
-        {activeTab === 'carteirinhas' && (
-          <DigitalIdCardView
-            members={members}
-            divisoes={divisoes}
-            statuses={statuses}
           />
         )}
 

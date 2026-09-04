@@ -1,11 +1,11 @@
 import React from 'react';
 import { 
-  Users, MapPin, BarChart3, CreditCard, History, Lock, Unlock, CalendarDays,
+  Users, MapPin, BarChart3, History, Lock, Unlock, CalendarDays,
   Skull, Menu, X, Database, ShieldCheck, Sparkles
 } from 'lucide-react';
 import { Divisao, Member } from '../types';
 
-export type ActiveTab = 'integrantes' | 'divisoes' | 'relatorios' | 'agenda' | 'carteirinhas' | 'auditoria' | 'gemini_ia';
+export type ActiveTab = 'integrantes' | 'divisoes' | 'relatorios' | 'agenda' | 'auditoria' | 'gemini_ia';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -41,7 +41,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'divisoes', label: 'Divisões', icon: <MapPin size={16} />, badge: String(divisoesCount) },
     { id: 'relatorios', label: 'Relatórios & Estatísticas', icon: <BarChart3 size={16} /> },
     { id: 'agenda', label: 'Agenda de Eventos', icon: <CalendarDays size={16} /> },
-    { id: 'carteirinhas', label: 'Credenciais', icon: <CreditCard size={16} /> },
     { id: 'gemini_ia', label: 'Inteligência Gemini', icon: <Sparkles size={16} className="text-amber-400" />, badge: '3.8' },
     { id: 'auditoria', label: 'Auditoria', icon: <History size={16} /> },
   ];
