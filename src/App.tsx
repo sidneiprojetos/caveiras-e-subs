@@ -4,7 +4,8 @@ import {
   getStoredDivisoes, saveStoredDivisoes, 
   getStoredLogs, addActivityLog,
   getStoredStatuses, saveStoredStatuses,
-  getStoredGrupamentos, saveStoredGrupamentos
+  getStoredGrupamentos, saveStoredGrupamentos,
+  getStoredAgendaEvents, saveStoredAgendaEvents
 } from './data/initialData';
 import { 
   subscribeToMembers, 
@@ -24,9 +25,12 @@ import {
   subscribeToGrupamentos,
   saveGrupamentoToFirestore,
   deleteGrupamentoFromFirestore,
+  subscribeToAgendaEvents,
+  saveAgendaEventToFirestore,
+  deleteAgendaEventFromFirestore,
   SUPER_ADMIN_EMAIL
 } from './lib/firebase';
-import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, GrupamentoConfig } from './types';
+import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, GrupamentoConfig, AgendaEvent } from './types';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { MemberList } from './components/MemberList';
 import { DivisionManager } from './components/DivisionManager';
@@ -41,6 +45,7 @@ import { AdminAuthModal } from './components/AdminAuthModal';
 import { CrudTestModal } from './components/CrudTestModal';
 import { PrintPreviewModal } from './components/PrintPreviewModal';
 import { GeminiIntelligenceView } from './components/GeminiIntelligenceView';
+import { AgendaView } from './components/AgendaView';
 import { printGeminiDocument } from './utils/printService';
 import { CheckCircle, AlertTriangle, ShieldCheck, Skull, Cloud } from 'lucide-react';
 
@@ -51,6 +56,7 @@ export default function App() {
   const [statuses, setStatuses] = useState<MemberStatusConfig[]>([]);
   const [grupamentos, setGrupamentos] = useState<GrupamentoConfig[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [agendaEvents, setAgendaEvents] = useState<AgendaEvent[]>([]);
   const [isFirestoreConnected, setIsFirestoreConnected] = useState<boolean>(true);
 
   // Navigation & View States
@@ -92,6 +98,7 @@ export default function App() {
     setLogs(loadedLogs);
     setStatuses(getStoredStatuses());
     setGrupamentos(getStoredGrupamentos());
+    setAgendaEvents(getStoredAgendaEvents());
 
     // Subscribe to Firestore in Real Time
     const unsubMembers = subscribeToMembers(
@@ -135,6 +142,16 @@ export default function App() {
       }
     );
 
+    const unsubAgenda = subscribeToAgendaEvents(
+      (cloudEvents) => {
+        setAgendaEvents(cloudEvents);
+        saveStoredAgendaEvents(cloudEvents);
+      },
+      (err) => {
+        console.warn('Firestore agenda sync warning, using local cache:', err);
+      }
+    );
+
     const unsubLogs = subscribeToLogs(
       (cloudLogs) => {
         setLogs(cloudLogs);
@@ -159,6 +176,7 @@ export default function App() {
       unsubDivisoes();
       unsubStatuses();
       unsubGrupamentos();
+      unsubAgenda();
       unsubLogs();
       unsubAdmins();
     };
@@ -173,6 +191,35 @@ export default function App() {
   const handleSaveDivisoes = (updatedDivisoes: Divisao[]) => {
     setDivisoes(updatedDivisoes);
     saveStoredDivisoes(updatedDivisoes);
+  };
+
+  const handleSaveAgendaEvent = async (event: AgendaEvent) => {
+    const updatedEvents = agendaEvents.some(existing => existing.id === event.id)
+      ? agendaEvents.map(existing => existing.id === event.id ? event : existing)
+      : [...agendaEvents, event];
+    setAgendaEvents(updatedEvents);
+    saveStoredAgendaEvents(updatedEvents);
+    try {
+      await saveAgendaEventToFirestore(event);
+      showToast(`Evento "${event.title}" sincronizado na agenda.`);
+    } catch (err) {
+      console.warn('Firestore agenda save error, kept in local storage:', err);
+      showToast(`Evento "${event.title}" salvo localmente.`, 'info');
+    }
+  };
+
+  const handleDeleteAgendaEvent = async (eventId: string) => {
+    const event = agendaEvents.find(item => item.id === eventId);
+    const updatedEvents = agendaEvents.filter(item => item.id !== eventId);
+    setAgendaEvents(updatedEvents);
+    saveStoredAgendaEvents(updatedEvents);
+    try {
+      await deleteAgendaEventFromFirestore(eventId);
+      showToast(`Evento "${event?.title || ''}" removido da agenda.`, 'info');
+    } catch (err) {
+      console.warn('Firestore agenda delete error, kept local removal:', err);
+      showToast(`Evento "${event?.title || ''}" removido localmente.`, 'info');
+    }
   };
 
   // Status Management Handlers
@@ -482,6 +529,17 @@ export default function App() {
             divisoes={divisoes}
             onImportBackup={handleImportBackup}
             statuses={statuses}
+          />
+        )}
+
+        {activeTab === 'agenda' && (
+          <AgendaView
+            events={agendaEvents}
+            divisoes={divisoes}
+            isAdmin={isAdmin}
+            onRequireAdmin={() => setIsAdminModalOpen(true)}
+            onSaveEvent={handleSaveAgendaEvent}
+            onDeleteEvent={handleDeleteAgendaEvent}
           />
         )}
 

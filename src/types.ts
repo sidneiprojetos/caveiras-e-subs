@@ -158,6 +158,20 @@ export interface ActivityLog {
   details: string;
 }
 
+export type EventType = 'REUNIAO' | 'COMBOIO' | 'EVENTO' | 'TREINAMENTO' | 'OUTRO';
+
+export interface AgendaEvent {
+  id: string;
+  title: string;
+  date: string;
+  time?: string;
+  type: EventType;
+  location?: string;
+  divisaoId?: string;
+  description?: string;
+  createdAt: string;
+}
+
 export interface FilterState {
   search: string;
   divisaoId: string;

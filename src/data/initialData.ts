@@ -1,4 +1,4 @@
-import { Divisao, Member, ActivityLog, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig, DEFAULT_GRUPAMENTOS } from '../types';
+import { Divisao, Member, ActivityLog, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig, DEFAULT_GRUPAMENTOS, AgendaEvent } from '../types';
 
 export const INITIAL_DIVISOES: Divisao[] = [
   {
@@ -271,6 +271,28 @@ const STORAGE_KEYS = {
   ADMIN_SESSION: 'insanos_mc_admin_session_v1',
   STATUSES: 'insanos_mc_statuses_v1',
   GRUPAMENTOS: 'insanos_mc_grupamentos_v1',
+  AGENDA: 'insanos_mc_agenda_v1',
+};
+
+export const getStoredAgendaEvents = (): AgendaEvent[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.AGENDA);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.error('Error loading agenda events', e);
+  }
+  return [];
+};
+
+export const saveStoredAgendaEvents = (events: AgendaEvent[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.AGENDA, JSON.stringify(events));
+  } catch (e) {
+    console.error('Error saving agenda events', e);
+  }
 };
 
 export const getStoredGrupamentos = (): GrupamentoConfig[] => {

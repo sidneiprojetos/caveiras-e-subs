@@ -13,7 +13,7 @@ import {
   orderBy
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig, DEFAULT_GRUPAMENTOS } from '../types';
+import { Member, Divisao, ActivityLog, AdminUser, MemberStatusConfig, DEFAULT_MEMBER_STATUSES, GrupamentoConfig, DEFAULT_GRUPAMENTOS, AgendaEvent } from '../types';
 import { INITIAL_MEMBERS, INITIAL_DIVISOES, INITIAL_LOGS, getStoredStatuses, getStoredGrupamentos } from '../data/initialData';
 
 // Initialize Firebase App singleton
@@ -62,7 +62,8 @@ const COLLECTIONS = {
   SETTINGS: 'settings',
   ADMINS: 'admins',
   STATUSES: 'statuses',
-  GRUPAMENTOS: 'grupamentos'
+  GRUPAMENTOS: 'grupamentos',
+  AGENDA: 'agenda'
 };
 
 /**
@@ -506,6 +507,64 @@ export const saveGrupamentoToFirestore = async (grupamento: GrupamentoConfig): P
 export const deleteGrupamentoFromFirestore = async (grupamentoId: string): Promise<void> => {
   const docRef = doc(db, COLLECTIONS.GRUPAMENTOS, grupamentoId);
   await deleteDoc(docRef);
+};
+
+/**
+ * Real-time subscription to Agenda events with local cache fallback
+ */
+export const subscribeToAgendaEvents = (
+  callback: (events: AgendaEvent[]) => void,
+  onError?: (error: any) => void
+) => {
+  const colRef = collection(db, COLLECTIONS.AGENDA);
+
+  return onSnapshot(colRef, async (snapshot) => {
+    if (snapshot.empty) {
+      let initialData: AgendaEvent[] = [];
+      try {
+        const rawLocal = localStorage.getItem('insanos_mc_agenda_v1');
+        const parsed = rawLocal ? JSON.parse(rawLocal) : [];
+        if (Array.isArray(parsed)) initialData = parsed;
+      } catch (e) {
+        console.warn('Could not read localStorage for initial agenda seed', e);
+      }
+
+      if (initialData.length > 0) {
+        try {
+          const batch = writeBatch(db);
+          initialData.forEach((event) => batch.set(doc(db, COLLECTIONS.AGENDA, event.id), event));
+          await batch.commit();
+        } catch (seedErr) {
+          console.error('Error seeding agenda to Firestore:', seedErr);
+        }
+      }
+      callback(initialData);
+      return;
+    }
+
+    const items: AgendaEvent[] = [];
+    snapshot.forEach((d) => items.push(d.data() as AgendaEvent));
+    items.sort((a, b) => `${a.date}${a.time || ''}`.localeCompare(`${b.date}${b.time || ''}`));
+    callback(items);
+    try {
+      localStorage.setItem('insanos_mc_agenda_v1', JSON.stringify(items));
+    } catch (e) {}
+  }, (err) => {
+    console.error('Firestore agenda subscription error:', err);
+    if (onError) onError(err);
+  });
+};
+
+/** Save or update an Agenda event in Firestore */
+export const saveAgendaEventToFirestore = async (event: AgendaEvent): Promise<void> => {
+  const docRef = doc(db, COLLECTIONS.AGENDA, event.id);
+  const eventData = Object.fromEntries(Object.entries(event).filter(([, value]) => value !== undefined));
+  await setDoc(docRef, eventData, { merge: true });
+};
+
+/** Delete an Agenda event from Firestore */
+export const deleteAgendaEventFromFirestore = async (eventId: string): Promise<void> => {
+  await deleteDoc(doc(db, COLLECTIONS.AGENDA, eventId));
 };
 
 
